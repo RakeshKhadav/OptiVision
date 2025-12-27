@@ -24,8 +24,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Serve static files from React build
-const buildPath = path.join(__dirname, "../../frontend/dist");
-app.use(express.static(buildPath));
+// // Serve static files from React build
+// const buildPath = path.join(__dirname, "../../frontend/dist");
+// app.use(express.static(buildPath));
 
 export { app };
