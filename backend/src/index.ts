@@ -1,7 +1,7 @@
-import dotenv from "dotenv";
-import { app } from "./app";
-import { connectDB } from "./db/index";
-import { createServer } from "http";
+import dotenv from 'dotenv';
+import { app } from './app';
+import { connectDB } from './db/index.js';
+import { createServer } from 'http';
 
 dotenv.config();
 
@@ -15,5 +15,5 @@ connectDB()
     });
   })
   .catch((error) => {
-    console.error("❌ Database connection failed:", error.message);
+    console.error('❌ Database connection failed:', error.message);
   });
