@@ -15,6 +15,6 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tsconfig.build.json", "src/prismaClient.ts"],
   "exclude": ["node_modules", "dist"]
 }
