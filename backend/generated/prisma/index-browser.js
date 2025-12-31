@@ -130,6 +130,41 @@ exports.Prisma.UserScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CameraScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  status: 'status'
+};
+
+exports.Prisma.ZoneScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  coordinates: 'coordinates',
+  cameraId: 'cameraId'
+};
+
+exports.Prisma.AlertScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  severity: 'severity',
+  message: 'message',
+  snapshot: 'snapshot',
+  isResolved: 'isResolved',
+  createdAt: 'createdAt',
+  cameraId: 'cameraId'
+};
+
+exports.Prisma.ActivityLogScalarFieldEnum = {
+  id: 'id',
+  workerId: 'workerId',
+  action: 'action',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  duration: 'duration',
+  cameraId: 'cameraId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -140,9 +175,18 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 
 exports.Prisma.ModelName = {
-  User: 'User'
+  User: 'User',
+  Camera: 'Camera',
+  Zone: 'Zone',
+  Alert: 'Alert',
+  ActivityLog: 'ActivityLog'
 };
 
 /**

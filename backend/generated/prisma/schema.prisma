@@ -24,3 +24,46 @@ model User {
 
   @@map("users")
 }
+
+model Camera {
+  id     Int    @id @default(autoincrement())
+  name   String // e.g., "Packing Station 1"
+  status String @default("ONLINE")
+
+  zones  Zone[]
+  alerts Alert[]
+}
+
+model Zone {
+  id          Int    @id @default(autoincrement())
+  name        String // e.g., "Forklift Path", "Safe Walkway"
+  type        String // "DANGER", "SAFE", "RESTRICTED"
+  coordinates String // [0,0,0]
+
+  cameraId Int
+  camera   Camera @relation(fields: [cameraId], references: [id])
+}
+
+model Alert {
+  id         Int      @id @default(autoincrement())
+  type       String // "PPE_VIOLATION", "ZONE_INTRUSION", "IDLE_WORKER"
+  severity   String // "HIGH", "MEDIUM" , "NORMAL"
+  message    String // "Worker detected without vest in Zone A"
+  snapshot   String? // URL to image
+  isResolved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  cameraId Int
+  camera   Camera @relation(fields: [cameraId], references: [id])
+}
+
+model ActivityLog {
+  id        Int       @id @default(autoincrement())
+  workerId  String // ID assigned by tracking (e.g., "ID_42")
+  action    String // "IDLE", "WORKING", "TRANSIT"
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int? // Duration in seconds (filled when action ends)
+
+  cameraId Int
+}
