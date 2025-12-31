@@ -1,4 +1,4 @@
-import { prisma } from '../prismaClient';
+import { prisma } from '../prismaClient.js';
 
 export async function seed() {
   try {
@@ -19,3 +19,13 @@ export async function seed() {
     console.error('Error seeding database:', error);
   }
 }
+
+seed()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })
+
