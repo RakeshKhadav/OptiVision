@@ -1,15 +1,16 @@
-import express from "express";
-import cors from "cors";
-import path from "path";
-import cookieParser from "cookie-parser";
+import express from 'express';
+import cors from 'cors';
+// import path from "path";
+import cookieParser from 'cookie-parser';
+
+//Routes
+import userRoutes from './router/user.route.js';
 
 const app = express();
 
 // CORS middleware
 const frontendUrl = process.env.FRONTEND_URL;
-const allowedOrigins = frontendUrl
-  ? frontendUrl.split(",").map((origin) => origin.trim())
-  : [];
+const allowedOrigins = frontendUrl ? frontendUrl.split(',').map((origin) => origin.trim()) : [];
 
 app.use(
   cors({
@@ -27,5 +28,7 @@ app.use(cookieParser());
 // // Serve static files from React build
 // const buildPath = path.join(__dirname, "../../frontend/dist");
 // app.use(express.static(buildPath));
+
+app.use('/api/v1/users', userRoutes);
 
 export { app };
