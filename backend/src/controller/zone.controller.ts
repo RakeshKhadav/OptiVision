@@ -68,6 +68,13 @@ const deleteZone = asyncHandler(async (req: Request, res: Response) => {
         id: Number(id),
       },
     });
+
+    if (!deletedZone) {
+      throw new ApiError(404, 'Zone not found');
+    }
+
+    getIO().emit('zoneDeleted', deletedZone);
+
     res.status(200).json(new ApiResponse(200, deletedZone, 'Zone deleted successfully'));
   } catch (error) {
     throw new ApiError(500, `Failed to delete zone: ${error}`);
