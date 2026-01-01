@@ -4680,7 +4680,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot: string | null
+    snapshot: string
     isResolved: boolean
     createdAt: Date
     cameraId: number
@@ -4773,7 +4773,7 @@ export namespace Prisma {
       type: string
       severity: string
       message: string
-      snapshot: string | null
+      snapshot: string
       isResolved: boolean
       createdAt: Date
       cameraId: number
@@ -7032,7 +7032,7 @@ export namespace Prisma {
     type?: StringFilter<"Alert"> | string
     severity?: StringFilter<"Alert"> | string
     message?: StringFilter<"Alert"> | string
-    snapshot?: StringNullableFilter<"Alert"> | string | null
+    snapshot?: StringFilter<"Alert"> | string
     isResolved?: BoolFilter<"Alert"> | boolean
     createdAt?: DateTimeFilter<"Alert"> | Date | string
     cameraId?: IntFilter<"Alert"> | number
@@ -7044,7 +7044,7 @@ export namespace Prisma {
     type?: SortOrder
     severity?: SortOrder
     message?: SortOrder
-    snapshot?: SortOrderInput | SortOrder
+    snapshot?: SortOrder
     isResolved?: SortOrder
     createdAt?: SortOrder
     cameraId?: SortOrder
@@ -7059,7 +7059,7 @@ export namespace Prisma {
     type?: StringFilter<"Alert"> | string
     severity?: StringFilter<"Alert"> | string
     message?: StringFilter<"Alert"> | string
-    snapshot?: StringNullableFilter<"Alert"> | string | null
+    snapshot?: StringFilter<"Alert"> | string
     isResolved?: BoolFilter<"Alert"> | boolean
     createdAt?: DateTimeFilter<"Alert"> | Date | string
     cameraId?: IntFilter<"Alert"> | number
@@ -7071,7 +7071,7 @@ export namespace Prisma {
     type?: SortOrder
     severity?: SortOrder
     message?: SortOrder
-    snapshot?: SortOrderInput | SortOrder
+    snapshot?: SortOrder
     isResolved?: SortOrder
     createdAt?: SortOrder
     cameraId?: SortOrder
@@ -7090,7 +7090,7 @@ export namespace Prisma {
     type?: StringWithAggregatesFilter<"Alert"> | string
     severity?: StringWithAggregatesFilter<"Alert"> | string
     message?: StringWithAggregatesFilter<"Alert"> | string
-    snapshot?: StringNullableWithAggregatesFilter<"Alert"> | string | null
+    snapshot?: StringWithAggregatesFilter<"Alert"> | string
     isResolved?: BoolWithAggregatesFilter<"Alert"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Alert"> | Date | string
     cameraId?: IntWithAggregatesFilter<"Alert"> | number
@@ -7333,7 +7333,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
     camera: CameraCreateNestedOneWithoutAlertsInput
@@ -7344,7 +7344,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
     cameraId: number
@@ -7354,7 +7354,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     camera?: CameraUpdateOneRequiredWithoutAlertsNestedInput
@@ -7365,7 +7365,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cameraId?: IntFieldUpdateOperationsInput | number
@@ -7376,7 +7376,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
     cameraId: number
@@ -7386,7 +7386,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7396,7 +7396,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cameraId?: IntFieldUpdateOperationsInput | number
@@ -7669,29 +7669,9 @@ export namespace Prisma {
     cameraId?: SortOrder
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
   }
 
   export type AlertCountOrderByAggregateInput = {
@@ -7737,24 +7717,6 @@ export namespace Prisma {
     cameraId?: SortOrder
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
@@ -7783,6 +7745,11 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
   }
 
   export type ActivityLogCountOrderByAggregateInput = {
@@ -7977,10 +7944,6 @@ export namespace Prisma {
     connect?: CameraWhereUniqueInput
   }
 
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
   }
@@ -8099,51 +8062,9 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type NestedBoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -8163,6 +8084,17 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -8233,7 +8165,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
   }
@@ -8243,7 +8175,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
   }
@@ -8309,7 +8241,7 @@ export namespace Prisma {
     type?: StringFilter<"Alert"> | string
     severity?: StringFilter<"Alert"> | string
     message?: StringFilter<"Alert"> | string
-    snapshot?: StringNullableFilter<"Alert"> | string | null
+    snapshot?: StringFilter<"Alert"> | string
     isResolved?: BoolFilter<"Alert"> | boolean
     createdAt?: DateTimeFilter<"Alert"> | Date | string
     cameraId?: IntFilter<"Alert"> | number
@@ -8411,7 +8343,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
   }
@@ -8440,7 +8372,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8450,7 +8382,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8460,7 +8392,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

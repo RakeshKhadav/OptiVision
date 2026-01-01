@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
-import { asyncHandler } from '../utility/asyncHandler';
-import { ApiError } from '../utility/ApiError';
-import { prisma } from '../prismaClient';
+import { asyncHandler } from '../utility/asyncHandler.js';
+import { ApiError } from '../utility/ApiError.js';
+import { prisma } from '../prismaClient.js';
 import bcrypt from 'bcrypt';
-import { generateToken } from '../utility/jwt';
-import ApiResponse from '../utility/ApiResponse';
+import { generateToken } from '../utility/jwt.js';
+import ApiResponse from '../utility/ApiResponse.js';
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
   try {

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { asyncHandler } from '../utility/asyncHandler';
-import { ApiError } from '../utility/ApiError';
-import { prisma } from '../prismaClient';
-import { getIO } from '../services/socketService';
-import ApiResponse from '../utility/ApiResponse';
+import { asyncHandler } from '../utility/asyncHandler.js';
+import { ApiError } from '../utility/ApiError.js';
+import { prisma } from '../prismaClient.js';
+import { getIO } from '../services/socketService.js';
+import ApiResponse from '../utility/ApiResponse.js';
 
 const createZone = asyncHandler(async (req: Request, res: Response) => {
   try {
