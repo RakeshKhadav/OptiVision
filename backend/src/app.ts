@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 //Routes
 import userRoutes from './router/user.route.js';
 import zoneRoutes from './router/zone.route.js';
+import alertRoutes from './router/alert.route.js';
 
 const app = express();
 
@@ -32,5 +33,6 @@ app.use(cookieParser());
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/zones', zoneRoutes);
+app.use('/api/v1/alerts', alertRoutes);
 
 export { app };
