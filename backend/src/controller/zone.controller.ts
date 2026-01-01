@@ -60,4 +60,17 @@ const getZones = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { createZone, getZones };
+const deleteZone = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deletedZone = await prisma.zone.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+    res.status(200).json(new ApiResponse(200, deletedZone, 'Zone deleted successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to delete zone: ${error}`);
+  }
+});
+export { createZone, getZones, deleteZone };
