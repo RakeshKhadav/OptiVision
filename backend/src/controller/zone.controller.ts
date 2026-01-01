@@ -43,4 +43,21 @@ const createZone = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { createZone };
+const getZones = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const zones = await prisma.zone.findMany({
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        coordinates: true,
+        cameraId: true,
+      },
+    });
+    res.status(200).json(new ApiResponse(200, zones, 'Zones fetched successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to get zones: ${error}`);
+  }
+});
+
+export { createZone, getZones };
