@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.js';
-import { createZone } from '../controller/zone.controller.js';
+import { createZone, getZones } from '../controller/zone.controller.js';
 
 const router = Router();
 
 router.post('/', authenticate, createZone);
+router.get('/', authenticate, getZones);
 
 export default router;
