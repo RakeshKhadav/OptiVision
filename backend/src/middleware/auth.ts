@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { ApiError } from "../utility/ApiError";
-import { verifyToken } from "../utility/jwt";
-import { asyncHandler } from "../utility/asyncHandler";
+import { Request, Response, NextFunction } from 'express';
+import { ApiError } from '../utility/ApiError.js';
+import { verifyToken } from '../utility/jwt.js';
+import { asyncHandler } from '../utility/asyncHandler.js';
 
 interface AuthRequest extends Request {
   user?: {
@@ -13,22 +13,18 @@ interface AuthRequest extends Request {
 
 // Middleware to verify JWT token
 export const authenticate = asyncHandler(
-  async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
 
-      if (!authHeader || !authHeader.startsWith("Bearer")) {
-        throw new ApiError(401, "Access token is required");
+      if (!authHeader || !authHeader.startsWith('Bearer')) {
+        throw new ApiError(401, 'Access token is required');
       }
 
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
       if (!token) {
-        throw new ApiError(401, "Access token is required");
+        throw new ApiError(401, 'Access token is required');
       }
 
       // Verify the token
@@ -46,23 +42,19 @@ export const authenticate = asyncHandler(
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError(401, "Invalid or expired token");
+      throw new ApiError(401, 'Invalid or expired token');
     }
   }
 );
 
 // Middleware to check if user is admin
-export const requireAdmin = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
   if (!req.user) {
-    throw new ApiError(401, "Authentication required");
+    throw new ApiError(401, 'Authentication required');
   }
 
-  if (req.user.role !== "ADMIN") {
-    throw new ApiError(403, "Admin access required");
+  if (req.user.role !== 'ADMIN') {
+    throw new ApiError(403, 'Admin access required');
   }
 
   next();
@@ -70,15 +62,11 @@ export const requireAdmin = (
 
 // Middleware to check if user is authenticated (for optional auth)
 export const optionalAuth = asyncHandler(
-  async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
 
-      if (authHeader && authHeader.startsWith("Bearer ")) {
+      if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
 
         if (token) {
@@ -91,7 +79,7 @@ export const optionalAuth = asyncHandler(
             };
           } catch (error) {
             // Invalid token, but continue without authentication
-            console.warn("Invalid token in optional auth:", error);
+            console.warn('Invalid token in optional auth:', error);
           }
         }
       }
