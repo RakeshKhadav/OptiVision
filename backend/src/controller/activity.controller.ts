@@ -66,12 +66,24 @@ const getAllActivities = asyncHandler(async (req: Request, res: Response) => {
 
 const getStatsOfActivities = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const stats = await prisma.activityLog.groupBy({
+    const activityStats = await prisma.activityLog.groupBy({
       by: ['action'],
       _sum: {
         duration: true,
       },
     });
+
+    const alertStats = await prisma.alert.groupBy({
+      by: ['type'],
+      _count: {
+        id: true,
+      },
+    });
+
+    const stats = {
+      activityStats,
+      alertStats,
+    };
 
     if (!stats) {
       throw new ApiError(404, 'No stats found');

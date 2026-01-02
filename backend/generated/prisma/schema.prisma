@@ -20,9 +20,10 @@ model User {
 }
 
 model Camera {
-  id     Int    @id @default(autoincrement())
-  name   String // e.g., "Packing Station 1"
-  status String @default("ONLINE")
+  id              Int    @id @default(autoincrement())
+  name            String // e.g., "Packing Station 1"
+  status          String @default("ONLINE")
+  calibrationData Json?
 
   zones        Zone[]
   alerts       Alert[]

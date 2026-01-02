@@ -8,6 +8,7 @@ import userRoutes from './router/user.route.js';
 import zoneRoutes from './router/zone.route.js';
 import alertRoutes from './router/alert.route.js';
 import activityRoute from './router/activity.route.js';
+import cameraRoutes from './router/camera.route.js';
 
 const app = express();
 
@@ -36,5 +37,6 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/zones', zoneRoutes);
 app.use('/api/v1/alerts', alertRoutes);
 app.use('/api/v1/activity', activityRoute);
+app.use('/api/v1/cameras', cameraRoutes);
 
 export { app };
