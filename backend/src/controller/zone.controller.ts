@@ -80,4 +80,5 @@ const deleteZone = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(500, `Failed to delete zone: ${error}`);
   }
 });
+
 export { createZone, getZones, deleteZone };
