@@ -40,4 +40,49 @@ const createActivity = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { createActivity };
+const getAllActivities = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const activities = await prisma.activityLog.findMany({
+      select: {
+        id: true,
+        workerId: true,
+        action: true,
+        startTime: true,
+        endTime: true,
+        duration: true,
+        camera: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    res.status(200).json(new ApiResponse(200, activities, 'Activities retrieved successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to retrieve activities: ${error}`);
+  }
+});
+
+const getStatsOfActivities = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const stats = await prisma.activityLog.groupBy({
+      by: ['action'],
+      _sum: {
+        duration: true,
+      },
+    });
+
+    if (!stats) {
+      throw new ApiError(404, 'No stats found');
+    }
+
+    getIO().emit('activity_log_stats', stats);
+
+    res.status(200).json(new ApiResponse(200, stats, 'Activities stats retrieved successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to retrieve activities stats: ${error}`);
+  }
+});
+
+export { createActivity, getAllActivities, getStatsOfActivities };
