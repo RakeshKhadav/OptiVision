@@ -24,9 +24,9 @@ app.use(
 );
 
 // Add Json body parser middleware
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 // Add URL encoded body parser middleware
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // // Serve static files from React build
