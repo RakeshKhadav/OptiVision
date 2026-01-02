@@ -36,6 +36,8 @@ const createZone = asyncHandler(async (req: Request, res: Response) => {
     }
 
     getIO().emit('zoneCreated', newZone);
+    // Notify Python AI script to update detection polygons
+    getIO().emit('zone_update', { action: 'created', zone: newZone });
 
     res.status(201).json(new ApiResponse(201, newZone, 'Zone created successfully'));
   } catch (error) {
@@ -74,6 +76,8 @@ const deleteZone = asyncHandler(async (req: Request, res: Response) => {
     }
 
     getIO().emit('zoneDeleted', deletedZone);
+    // Notify Python AI script to remove detection polygon
+    getIO().emit('zone_update', { action: 'deleted', zone: deletedZone });
 
     res.status(200).json(new ApiResponse(200, deletedZone, 'Zone deleted successfully'));
   } catch (error) {

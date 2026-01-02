@@ -2331,6 +2331,7 @@ export namespace Prisma {
     id: number
     name: number
     status: number
+    calibrationData: number
     _all: number
   }
 
@@ -2359,6 +2360,7 @@ export namespace Prisma {
     id?: true
     name?: true
     status?: true
+    calibrationData?: true
     _all?: true
   }
 
@@ -2452,6 +2454,7 @@ export namespace Prisma {
     id: number
     name: string
     status: string
+    calibrationData: JsonValue | null
     _count: CameraCountAggregateOutputType | null
     _avg: CameraAvgAggregateOutputType | null
     _sum: CameraSumAggregateOutputType | null
@@ -2477,6 +2480,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
     zones?: boolean | Camera$zonesArgs<ExtArgs>
     alerts?: boolean | Camera$alertsArgs<ExtArgs>
     activityLogs?: boolean | Camera$activityLogsArgs<ExtArgs>
@@ -2487,21 +2491,24 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
   }, ExtArgs["result"]["camera"]>
 
   export type CameraSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
   }, ExtArgs["result"]["camera"]>
 
   export type CameraSelectScalar = {
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
   }
 
-  export type CameraOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status", ExtArgs["result"]["camera"]>
+  export type CameraOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status" | "calibrationData", ExtArgs["result"]["camera"]>
   export type CameraInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     zones?: boolean | Camera$zonesArgs<ExtArgs>
     alerts?: boolean | Camera$alertsArgs<ExtArgs>
@@ -2522,6 +2529,7 @@ export namespace Prisma {
       id: number
       name: string
       status: string
+      calibrationData: Prisma.JsonValue | null
     }, ExtArgs["result"]["camera"]>
     composites: {}
   }
@@ -2951,6 +2959,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Camera", 'Int'>
     readonly name: FieldRef<"Camera", 'String'>
     readonly status: FieldRef<"Camera", 'String'>
+    readonly calibrationData: FieldRef<"Camera", 'Json'>
   }
     
 
@@ -6816,7 +6825,8 @@ export namespace Prisma {
   export const CameraScalarFieldEnum: {
     id: 'id',
     name: 'name',
-    status: 'status'
+    status: 'status',
+    calibrationData: 'calibrationData'
   };
 
   export type CameraScalarFieldEnum = (typeof CameraScalarFieldEnum)[keyof typeof CameraScalarFieldEnum]
@@ -6868,12 +6878,29 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
   export const QueryMode: {
     default: 'default',
     insensitive: 'insensitive'
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   export const NullsOrder: {
@@ -6928,6 +6955,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -7024,6 +7065,7 @@ export namespace Prisma {
     id?: IntFilter<"Camera"> | number
     name?: StringFilter<"Camera"> | string
     status?: StringFilter<"Camera"> | string
+    calibrationData?: JsonNullableFilter<"Camera">
     zones?: ZoneListRelationFilter
     alerts?: AlertListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
@@ -7033,6 +7075,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    calibrationData?: SortOrderInput | SortOrder
     zones?: ZoneOrderByRelationAggregateInput
     alerts?: AlertOrderByRelationAggregateInput
     activityLogs?: ActivityLogOrderByRelationAggregateInput
@@ -7045,6 +7088,7 @@ export namespace Prisma {
     NOT?: CameraWhereInput | CameraWhereInput[]
     name?: StringFilter<"Camera"> | string
     status?: StringFilter<"Camera"> | string
+    calibrationData?: JsonNullableFilter<"Camera">
     zones?: ZoneListRelationFilter
     alerts?: AlertListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
@@ -7054,6 +7098,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    calibrationData?: SortOrderInput | SortOrder
     _count?: CameraCountOrderByAggregateInput
     _avg?: CameraAvgOrderByAggregateInput
     _max?: CameraMaxOrderByAggregateInput
@@ -7068,6 +7113,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Camera"> | number
     name?: StringWithAggregatesFilter<"Camera"> | string
     status?: StringWithAggregatesFilter<"Camera"> | string
+    calibrationData?: JsonNullableWithAggregatesFilter<"Camera">
   }
 
   export type ZoneWhereInput = {
@@ -7339,6 +7385,7 @@ export namespace Prisma {
   export type CameraCreateInput = {
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneCreateNestedManyWithoutCameraInput
     alerts?: AlertCreateNestedManyWithoutCameraInput
     activityLogs?: ActivityLogCreateNestedManyWithoutCameraInput
@@ -7348,6 +7395,7 @@ export namespace Prisma {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedCreateNestedManyWithoutCameraInput
     alerts?: AlertUncheckedCreateNestedManyWithoutCameraInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutCameraInput
@@ -7356,6 +7404,7 @@ export namespace Prisma {
   export type CameraUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUpdateManyWithoutCameraNestedInput
     alerts?: AlertUpdateManyWithoutCameraNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutCameraNestedInput
@@ -7365,6 +7414,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedUpdateManyWithoutCameraNestedInput
     alerts?: AlertUncheckedUpdateManyWithoutCameraNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutCameraNestedInput
@@ -7374,17 +7424,20 @@ export namespace Prisma {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CameraUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CameraUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ZoneCreateInput = {
@@ -7676,6 +7729,29 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type ZoneListRelationFilter = {
     every?: ZoneWhereInput
@@ -7695,6 +7771,11 @@ export namespace Prisma {
     none?: ActivityLogWhereInput
   }
 
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
   export type ZoneOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -7711,6 +7792,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    calibrationData?: SortOrder
   }
 
   export type CameraAvgOrderByAggregateInput = {
@@ -7747,6 +7829,32 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type CameraScalarRelationFilter = {
@@ -7864,11 +7972,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
   }
 
   export type ActivityLogCountOrderByAggregateInput = {
@@ -8237,6 +8340,40 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
   export type NestedBoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -8259,17 +8396,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -8481,6 +8607,7 @@ export namespace Prisma {
   export type CameraCreateWithoutZonesInput = {
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertCreateNestedManyWithoutCameraInput
     activityLogs?: ActivityLogCreateNestedManyWithoutCameraInput
   }
@@ -8489,6 +8616,7 @@ export namespace Prisma {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertUncheckedCreateNestedManyWithoutCameraInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutCameraInput
   }
@@ -8512,6 +8640,7 @@ export namespace Prisma {
   export type CameraUpdateWithoutZonesInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertUpdateManyWithoutCameraNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutCameraNestedInput
   }
@@ -8520,6 +8649,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertUncheckedUpdateManyWithoutCameraNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutCameraNestedInput
   }
@@ -8527,6 +8657,7 @@ export namespace Prisma {
   export type CameraCreateWithoutAlertsInput = {
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneCreateNestedManyWithoutCameraInput
     activityLogs?: ActivityLogCreateNestedManyWithoutCameraInput
   }
@@ -8535,6 +8666,7 @@ export namespace Prisma {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedCreateNestedManyWithoutCameraInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutCameraInput
   }
@@ -8558,6 +8690,7 @@ export namespace Prisma {
   export type CameraUpdateWithoutAlertsInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUpdateManyWithoutCameraNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutCameraNestedInput
   }
@@ -8566,6 +8699,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedUpdateManyWithoutCameraNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutCameraNestedInput
   }
@@ -8573,6 +8707,7 @@ export namespace Prisma {
   export type CameraCreateWithoutActivityLogsInput = {
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneCreateNestedManyWithoutCameraInput
     alerts?: AlertCreateNestedManyWithoutCameraInput
   }
@@ -8581,6 +8716,7 @@ export namespace Prisma {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedCreateNestedManyWithoutCameraInput
     alerts?: AlertUncheckedCreateNestedManyWithoutCameraInput
   }
@@ -8604,6 +8740,7 @@ export namespace Prisma {
   export type CameraUpdateWithoutActivityLogsInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUpdateManyWithoutCameraNestedInput
     alerts?: AlertUpdateManyWithoutCameraNestedInput
   }
@@ -8612,6 +8749,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedUpdateManyWithoutCameraNestedInput
     alerts?: AlertUncheckedUpdateManyWithoutCameraNestedInput
   }
