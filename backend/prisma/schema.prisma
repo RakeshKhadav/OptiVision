@@ -26,6 +26,7 @@ model Camera {
 
   zones     Zone[]
   alerts    Alert[]
+  activityLogs ActivityLog[]
 }
 
 model Zone {
@@ -60,4 +61,5 @@ model ActivityLog {
   duration    Int?     // Duration in seconds (filled when action ends)
   
   cameraId    Int
+  camera      Camera   @relation(fields: [cameraId], references: [id])
 }
