@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { app } from './app';
+import { app } from './app.js';
 import { connectDB } from './db/index.js';
 import { createServer } from 'http';
 import { initSocket } from './services/socketService.js';
