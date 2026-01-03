@@ -1,0 +1,88 @@
+import { Request, Response } from 'express';
+import { asyncHandler } from '../utility/asyncHandler.js';
+import { ApiError } from '../utility/ApiError.js';
+import { prisma } from '../prismaClient.js';
+import { getIO } from '../services/socketService.js';
+import ApiResponse from '../utility/ApiResponse.js';
+
+const createZone = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { name, type, coordinates, cameraId } = req.body;
+    if (!name || !type || !coordinates || !cameraId) {
+      throw new ApiError(400, 'All fields are required');
+    }
+    const newZone = await prisma.zone.create({
+      data: {
+        name,
+        type,
+        coordinates,
+        camera: {
+          connect: {
+            id: cameraId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        coordinates: true,
+        cameraId: true,
+      },
+    });
+
+    if (!newZone) {
+      throw new ApiError(500, 'Failed to create zone');
+    }
+
+    getIO().emit('zoneCreated', newZone);
+    // Notify Python AI script to update detection polygons
+    getIO().emit('zone_update', { action: 'created', zone: newZone });
+
+    res.status(201).json(new ApiResponse(201, newZone, 'Zone created successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to create zone: ${error}`);
+  }
+});
+
+const getZones = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const zones = await prisma.zone.findMany({
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        coordinates: true,
+        cameraId: true,
+      },
+    });
+    res.status(200).json(new ApiResponse(200, zones, 'Zones fetched successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to get zones: ${error}`);
+  }
+});
+
+const deleteZone = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deletedZone = await prisma.zone.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    if (!deletedZone) {
+      throw new ApiError(404, 'Zone not found');
+    }
+
+    getIO().emit('zoneDeleted', deletedZone);
+    // Notify Python AI script to remove detection polygon
+    getIO().emit('zone_update', { action: 'deleted', zone: deletedZone });
+
+    res.status(200).json(new ApiResponse(200, deletedZone, 'Zone deleted successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to delete zone: ${error}`);
+  }
+});
+
+export { createZone, getZones, deleteZone };

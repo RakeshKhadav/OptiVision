@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { app } from './app';
+import { app } from './app.js';
 import { connectDB } from './db/index.js';
 import { createServer } from 'http';
 import { initSocket } from './services/socketService.js';
@@ -20,7 +20,7 @@ dotenv.config();
 
 connectDB()
   .then(() => {
-    const PORT = process.env.PORT || 8080;
+    const PORT = process.env.PORT || 3000;
     const server = createServer(app);
 
     // Initialize Socket.IO

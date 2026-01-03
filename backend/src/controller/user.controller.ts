@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
-import { asyncHandler } from '../utility/asyncHandler';
-import { ApiError } from '../utility/ApiError';
-import { prisma } from '../prismaClient';
+import { asyncHandler } from '../utility/asyncHandler.js';
+import { ApiError } from '../utility/ApiError.js';
+import { prisma } from '../prismaClient.js';
 import bcrypt from 'bcrypt';
-import { generateToken } from '../utility/jwt';
-import ApiResponse from '../utility/ApiResponse';
+import { generateToken } from '../utility/jwt.js';
+import ApiResponse from '../utility/ApiResponse.js';
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
   try {
@@ -121,4 +121,32 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { registerUser, loginUser };
+const getCurrentUser = asyncHandler(async (req: any, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      throw new ApiError(401, 'User not authenticated');
+    }
+
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    if (!userData) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    return res.status(200).json(new ApiResponse(200, userData, 'User retrieved successfully'));
+  } catch (error) {
+    throw new ApiError(500, `Failed to get current user: ${error}`);
+  }
+});
+
+export { registerUser, loginUser, getCurrentUser };

@@ -1228,11 +1228,13 @@ export namespace Prisma {
   export type CameraCountOutputType = {
     zones: number
     alerts: number
+    activityLogs: number
   }
 
   export type CameraCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     zones?: boolean | CameraCountOutputTypeCountZonesArgs
     alerts?: boolean | CameraCountOutputTypeCountAlertsArgs
+    activityLogs?: boolean | CameraCountOutputTypeCountActivityLogsArgs
   }
 
   // Custom InputTypes
@@ -1258,6 +1260,13 @@ export namespace Prisma {
    */
   export type CameraCountOutputTypeCountAlertsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AlertWhereInput
+  }
+
+  /**
+   * CameraCountOutputType without action
+   */
+  export type CameraCountOutputTypeCountActivityLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ActivityLogWhereInput
   }
 
 
@@ -2322,6 +2331,7 @@ export namespace Prisma {
     id: number
     name: number
     status: number
+    calibrationData: number
     _all: number
   }
 
@@ -2350,6 +2360,7 @@ export namespace Prisma {
     id?: true
     name?: true
     status?: true
+    calibrationData?: true
     _all?: true
   }
 
@@ -2443,6 +2454,7 @@ export namespace Prisma {
     id: number
     name: string
     status: string
+    calibrationData: JsonValue | null
     _count: CameraCountAggregateOutputType | null
     _avg: CameraAvgAggregateOutputType | null
     _sum: CameraSumAggregateOutputType | null
@@ -2468,8 +2480,10 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
     zones?: boolean | Camera$zonesArgs<ExtArgs>
     alerts?: boolean | Camera$alertsArgs<ExtArgs>
+    activityLogs?: boolean | Camera$activityLogsArgs<ExtArgs>
     _count?: boolean | CameraCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["camera"]>
 
@@ -2477,24 +2491,28 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
   }, ExtArgs["result"]["camera"]>
 
   export type CameraSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
   }, ExtArgs["result"]["camera"]>
 
   export type CameraSelectScalar = {
     id?: boolean
     name?: boolean
     status?: boolean
+    calibrationData?: boolean
   }
 
-  export type CameraOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status", ExtArgs["result"]["camera"]>
+  export type CameraOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "status" | "calibrationData", ExtArgs["result"]["camera"]>
   export type CameraInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     zones?: boolean | Camera$zonesArgs<ExtArgs>
     alerts?: boolean | Camera$alertsArgs<ExtArgs>
+    activityLogs?: boolean | Camera$activityLogsArgs<ExtArgs>
     _count?: boolean | CameraCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CameraIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2505,11 +2523,13 @@ export namespace Prisma {
     objects: {
       zones: Prisma.$ZonePayload<ExtArgs>[]
       alerts: Prisma.$AlertPayload<ExtArgs>[]
+      activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
       status: string
+      calibrationData: Prisma.JsonValue | null
     }, ExtArgs["result"]["camera"]>
     composites: {}
   }
@@ -2906,6 +2926,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     zones<T extends Camera$zonesArgs<ExtArgs> = {}>(args?: Subset<T, Camera$zonesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ZonePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     alerts<T extends Camera$alertsArgs<ExtArgs> = {}>(args?: Subset<T, Camera$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    activityLogs<T extends Camera$activityLogsArgs<ExtArgs> = {}>(args?: Subset<T, Camera$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2938,6 +2959,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Camera", 'Int'>
     readonly name: FieldRef<"Camera", 'String'>
     readonly status: FieldRef<"Camera", 'String'>
+    readonly calibrationData: FieldRef<"Camera", 'Json'>
   }
     
 
@@ -3371,6 +3393,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AlertScalarFieldEnum | AlertScalarFieldEnum[]
+  }
+
+  /**
+   * Camera.activityLogs
+   */
+  export type Camera$activityLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
+    where?: ActivityLogWhereInput
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    cursor?: ActivityLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
   }
 
   /**
@@ -4680,7 +4726,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot: string | null
+    snapshot: string
     isResolved: boolean
     createdAt: Date
     cameraId: number
@@ -4773,7 +4819,7 @@ export namespace Prisma {
       type: string
       severity: string
       message: string
-      snapshot: string | null
+      snapshot: string
       isResolved: boolean
       createdAt: Date
       cameraId: number
@@ -5845,6 +5891,7 @@ export namespace Prisma {
     endTime?: boolean
     duration?: boolean
     cameraId?: boolean
+    camera?: boolean | CameraDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["activityLog"]>
 
   export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5855,6 +5902,7 @@ export namespace Prisma {
     endTime?: boolean
     duration?: boolean
     cameraId?: boolean
+    camera?: boolean | CameraDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["activityLog"]>
 
   export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5865,6 +5913,7 @@ export namespace Prisma {
     endTime?: boolean
     duration?: boolean
     cameraId?: boolean
+    camera?: boolean | CameraDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["activityLog"]>
 
   export type ActivityLogSelectScalar = {
@@ -5878,10 +5927,21 @@ export namespace Prisma {
   }
 
   export type ActivityLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "workerId" | "action" | "startTime" | "endTime" | "duration" | "cameraId", ExtArgs["result"]["activityLog"]>
+  export type ActivityLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    camera?: boolean | CameraDefaultArgs<ExtArgs>
+  }
+  export type ActivityLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    camera?: boolean | CameraDefaultArgs<ExtArgs>
+  }
+  export type ActivityLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    camera?: boolean | CameraDefaultArgs<ExtArgs>
+  }
 
   export type $ActivityLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ActivityLog"
-    objects: {}
+    objects: {
+      camera: Prisma.$CameraPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       workerId: string
@@ -6284,6 +6344,7 @@ export namespace Prisma {
    */
   export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    camera<T extends CameraDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CameraDefaultArgs<ExtArgs>>): Prisma__CameraClient<$Result.GetResult<Prisma.$CameraPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6337,6 +6398,10 @@ export namespace Prisma {
      */
     omit?: ActivityLogOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
+    /**
      * Filter, which ActivityLog to fetch.
      */
     where: ActivityLogWhereUniqueInput
@@ -6355,6 +6420,10 @@ export namespace Prisma {
      */
     omit?: ActivityLogOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
+    /**
      * Filter, which ActivityLog to fetch.
      */
     where: ActivityLogWhereUniqueInput
@@ -6372,6 +6441,10 @@ export namespace Prisma {
      * Omit specific fields from the ActivityLog
      */
     omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
     /**
      * Filter, which ActivityLog to fetch.
      */
@@ -6421,6 +6494,10 @@ export namespace Prisma {
      */
     omit?: ActivityLogOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
+    /**
      * Filter, which ActivityLog to fetch.
      */
     where?: ActivityLogWhereInput
@@ -6469,6 +6546,10 @@ export namespace Prisma {
      */
     omit?: ActivityLogOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
+    /**
      * Filter, which ActivityLogs to fetch.
      */
     where?: ActivityLogWhereInput
@@ -6512,6 +6593,10 @@ export namespace Prisma {
      */
     omit?: ActivityLogOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
+    /**
      * The data needed to create a ActivityLog.
      */
     data: XOR<ActivityLogCreateInput, ActivityLogUncheckedCreateInput>
@@ -6545,6 +6630,10 @@ export namespace Prisma {
      */
     data: ActivityLogCreateManyInput | ActivityLogCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6559,6 +6648,10 @@ export namespace Prisma {
      * Omit specific fields from the ActivityLog
      */
     omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
     /**
      * The data needed to update a ActivityLog.
      */
@@ -6611,6 +6704,10 @@ export namespace Prisma {
      * Limit how many ActivityLogs to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6625,6 +6722,10 @@ export namespace Prisma {
      * Omit specific fields from the ActivityLog
      */
     omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
     /**
      * The filter to search for the ActivityLog to update in case it exists.
      */
@@ -6651,6 +6752,10 @@ export namespace Prisma {
      * Omit specific fields from the ActivityLog
      */
     omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
     /**
      * Filter which ActivityLog to delete.
      */
@@ -6683,6 +6788,10 @@ export namespace Prisma {
      * Omit specific fields from the ActivityLog
      */
     omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ActivityLogInclude<ExtArgs> | null
   }
 
 
@@ -6716,7 +6825,8 @@ export namespace Prisma {
   export const CameraScalarFieldEnum: {
     id: 'id',
     name: 'name',
-    status: 'status'
+    status: 'status',
+    calibrationData: 'calibrationData'
   };
 
   export type CameraScalarFieldEnum = (typeof CameraScalarFieldEnum)[keyof typeof CameraScalarFieldEnum]
@@ -6768,12 +6878,29 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
   export const QueryMode: {
     default: 'default',
     insensitive: 'insensitive'
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   export const NullsOrder: {
@@ -6828,6 +6955,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -6924,16 +7065,20 @@ export namespace Prisma {
     id?: IntFilter<"Camera"> | number
     name?: StringFilter<"Camera"> | string
     status?: StringFilter<"Camera"> | string
+    calibrationData?: JsonNullableFilter<"Camera">
     zones?: ZoneListRelationFilter
     alerts?: AlertListRelationFilter
+    activityLogs?: ActivityLogListRelationFilter
   }
 
   export type CameraOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    calibrationData?: SortOrderInput | SortOrder
     zones?: ZoneOrderByRelationAggregateInput
     alerts?: AlertOrderByRelationAggregateInput
+    activityLogs?: ActivityLogOrderByRelationAggregateInput
   }
 
   export type CameraWhereUniqueInput = Prisma.AtLeast<{
@@ -6943,14 +7088,17 @@ export namespace Prisma {
     NOT?: CameraWhereInput | CameraWhereInput[]
     name?: StringFilter<"Camera"> | string
     status?: StringFilter<"Camera"> | string
+    calibrationData?: JsonNullableFilter<"Camera">
     zones?: ZoneListRelationFilter
     alerts?: AlertListRelationFilter
+    activityLogs?: ActivityLogListRelationFilter
   }, "id">
 
   export type CameraOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    calibrationData?: SortOrderInput | SortOrder
     _count?: CameraCountOrderByAggregateInput
     _avg?: CameraAvgOrderByAggregateInput
     _max?: CameraMaxOrderByAggregateInput
@@ -6965,6 +7113,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Camera"> | number
     name?: StringWithAggregatesFilter<"Camera"> | string
     status?: StringWithAggregatesFilter<"Camera"> | string
+    calibrationData?: JsonNullableWithAggregatesFilter<"Camera">
   }
 
   export type ZoneWhereInput = {
@@ -7032,7 +7181,7 @@ export namespace Prisma {
     type?: StringFilter<"Alert"> | string
     severity?: StringFilter<"Alert"> | string
     message?: StringFilter<"Alert"> | string
-    snapshot?: StringNullableFilter<"Alert"> | string | null
+    snapshot?: StringFilter<"Alert"> | string
     isResolved?: BoolFilter<"Alert"> | boolean
     createdAt?: DateTimeFilter<"Alert"> | Date | string
     cameraId?: IntFilter<"Alert"> | number
@@ -7044,7 +7193,7 @@ export namespace Prisma {
     type?: SortOrder
     severity?: SortOrder
     message?: SortOrder
-    snapshot?: SortOrderInput | SortOrder
+    snapshot?: SortOrder
     isResolved?: SortOrder
     createdAt?: SortOrder
     cameraId?: SortOrder
@@ -7059,7 +7208,7 @@ export namespace Prisma {
     type?: StringFilter<"Alert"> | string
     severity?: StringFilter<"Alert"> | string
     message?: StringFilter<"Alert"> | string
-    snapshot?: StringNullableFilter<"Alert"> | string | null
+    snapshot?: StringFilter<"Alert"> | string
     isResolved?: BoolFilter<"Alert"> | boolean
     createdAt?: DateTimeFilter<"Alert"> | Date | string
     cameraId?: IntFilter<"Alert"> | number
@@ -7071,7 +7220,7 @@ export namespace Prisma {
     type?: SortOrder
     severity?: SortOrder
     message?: SortOrder
-    snapshot?: SortOrderInput | SortOrder
+    snapshot?: SortOrder
     isResolved?: SortOrder
     createdAt?: SortOrder
     cameraId?: SortOrder
@@ -7090,7 +7239,7 @@ export namespace Prisma {
     type?: StringWithAggregatesFilter<"Alert"> | string
     severity?: StringWithAggregatesFilter<"Alert"> | string
     message?: StringWithAggregatesFilter<"Alert"> | string
-    snapshot?: StringNullableWithAggregatesFilter<"Alert"> | string | null
+    snapshot?: StringWithAggregatesFilter<"Alert"> | string
     isResolved?: BoolWithAggregatesFilter<"Alert"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Alert"> | Date | string
     cameraId?: IntWithAggregatesFilter<"Alert"> | number
@@ -7107,6 +7256,7 @@ export namespace Prisma {
     endTime?: DateTimeNullableFilter<"ActivityLog"> | Date | string | null
     duration?: IntNullableFilter<"ActivityLog"> | number | null
     cameraId?: IntFilter<"ActivityLog"> | number
+    camera?: XOR<CameraScalarRelationFilter, CameraWhereInput>
   }
 
   export type ActivityLogOrderByWithRelationInput = {
@@ -7117,6 +7267,7 @@ export namespace Prisma {
     endTime?: SortOrderInput | SortOrder
     duration?: SortOrderInput | SortOrder
     cameraId?: SortOrder
+    camera?: CameraOrderByWithRelationInput
   }
 
   export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
@@ -7130,6 +7281,7 @@ export namespace Prisma {
     endTime?: DateTimeNullableFilter<"ActivityLog"> | Date | string | null
     duration?: IntNullableFilter<"ActivityLog"> | number | null
     cameraId?: IntFilter<"ActivityLog"> | number
+    camera?: XOR<CameraScalarRelationFilter, CameraWhereInput>
   }, "id">
 
   export type ActivityLogOrderByWithAggregationInput = {
@@ -7233,48 +7385,59 @@ export namespace Prisma {
   export type CameraCreateInput = {
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneCreateNestedManyWithoutCameraInput
     alerts?: AlertCreateNestedManyWithoutCameraInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutCameraInput
   }
 
   export type CameraUncheckedCreateInput = {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedCreateNestedManyWithoutCameraInput
     alerts?: AlertUncheckedCreateNestedManyWithoutCameraInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutCameraInput
   }
 
   export type CameraUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUpdateManyWithoutCameraNestedInput
     alerts?: AlertUpdateManyWithoutCameraNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutCameraNestedInput
   }
 
   export type CameraUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedUpdateManyWithoutCameraNestedInput
     alerts?: AlertUncheckedUpdateManyWithoutCameraNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutCameraNestedInput
   }
 
   export type CameraCreateManyInput = {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CameraUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CameraUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ZoneCreateInput = {
@@ -7333,7 +7496,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
     camera: CameraCreateNestedOneWithoutAlertsInput
@@ -7344,7 +7507,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
     cameraId: number
@@ -7354,7 +7517,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     camera?: CameraUpdateOneRequiredWithoutAlertsNestedInput
@@ -7365,7 +7528,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cameraId?: IntFieldUpdateOperationsInput | number
@@ -7376,7 +7539,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
     cameraId: number
@@ -7386,7 +7549,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7396,7 +7559,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cameraId?: IntFieldUpdateOperationsInput | number
@@ -7408,7 +7571,7 @@ export namespace Prisma {
     startTime: Date | string
     endTime?: Date | string | null
     duration?: number | null
-    cameraId: number
+    camera: CameraCreateNestedOneWithoutActivityLogsInput
   }
 
   export type ActivityLogUncheckedCreateInput = {
@@ -7427,7 +7590,7 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
-    cameraId?: IntFieldUpdateOperationsInput | number
+    camera?: CameraUpdateOneRequiredWithoutActivityLogsNestedInput
   }
 
   export type ActivityLogUncheckedUpdateInput = {
@@ -7456,7 +7619,6 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
-    cameraId?: IntFieldUpdateOperationsInput | number
   }
 
   export type ActivityLogUncheckedUpdateManyInput = {
@@ -7567,6 +7729,29 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type ZoneListRelationFilter = {
     every?: ZoneWhereInput
@@ -7580,6 +7765,17 @@ export namespace Prisma {
     none?: AlertWhereInput
   }
 
+  export type ActivityLogListRelationFilter = {
+    every?: ActivityLogWhereInput
+    some?: ActivityLogWhereInput
+    none?: ActivityLogWhereInput
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
   export type ZoneOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -7588,10 +7784,15 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type ActivityLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type CameraCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    calibrationData?: SortOrder
   }
 
   export type CameraAvgOrderByAggregateInput = {
@@ -7628,6 +7829,32 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type CameraScalarRelationFilter = {
@@ -7669,29 +7896,9 @@ export namespace Prisma {
     cameraId?: SortOrder
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
   }
 
   export type AlertCountOrderByAggregateInput = {
@@ -7735,24 +7942,6 @@ export namespace Prisma {
   export type AlertSumOrderByAggregateInput = {
     id?: SortOrder
     cameraId?: SortOrder
-  }
-
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -7879,6 +8068,13 @@ export namespace Prisma {
     connect?: AlertWhereUniqueInput | AlertWhereUniqueInput[]
   }
 
+  export type ActivityLogCreateNestedManyWithoutCameraInput = {
+    create?: XOR<ActivityLogCreateWithoutCameraInput, ActivityLogUncheckedCreateWithoutCameraInput> | ActivityLogCreateWithoutCameraInput[] | ActivityLogUncheckedCreateWithoutCameraInput[]
+    connectOrCreate?: ActivityLogCreateOrConnectWithoutCameraInput | ActivityLogCreateOrConnectWithoutCameraInput[]
+    createMany?: ActivityLogCreateManyCameraInputEnvelope
+    connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+  }
+
   export type ZoneUncheckedCreateNestedManyWithoutCameraInput = {
     create?: XOR<ZoneCreateWithoutCameraInput, ZoneUncheckedCreateWithoutCameraInput> | ZoneCreateWithoutCameraInput[] | ZoneUncheckedCreateWithoutCameraInput[]
     connectOrCreate?: ZoneCreateOrConnectWithoutCameraInput | ZoneCreateOrConnectWithoutCameraInput[]
@@ -7891,6 +8087,13 @@ export namespace Prisma {
     connectOrCreate?: AlertCreateOrConnectWithoutCameraInput | AlertCreateOrConnectWithoutCameraInput[]
     createMany?: AlertCreateManyCameraInputEnvelope
     connect?: AlertWhereUniqueInput | AlertWhereUniqueInput[]
+  }
+
+  export type ActivityLogUncheckedCreateNestedManyWithoutCameraInput = {
+    create?: XOR<ActivityLogCreateWithoutCameraInput, ActivityLogUncheckedCreateWithoutCameraInput> | ActivityLogCreateWithoutCameraInput[] | ActivityLogUncheckedCreateWithoutCameraInput[]
+    connectOrCreate?: ActivityLogCreateOrConnectWithoutCameraInput | ActivityLogCreateOrConnectWithoutCameraInput[]
+    createMany?: ActivityLogCreateManyCameraInputEnvelope
+    connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
   }
 
   export type ZoneUpdateManyWithoutCameraNestedInput = {
@@ -7919,6 +8122,20 @@ export namespace Prisma {
     update?: AlertUpdateWithWhereUniqueWithoutCameraInput | AlertUpdateWithWhereUniqueWithoutCameraInput[]
     updateMany?: AlertUpdateManyWithWhereWithoutCameraInput | AlertUpdateManyWithWhereWithoutCameraInput[]
     deleteMany?: AlertScalarWhereInput | AlertScalarWhereInput[]
+  }
+
+  export type ActivityLogUpdateManyWithoutCameraNestedInput = {
+    create?: XOR<ActivityLogCreateWithoutCameraInput, ActivityLogUncheckedCreateWithoutCameraInput> | ActivityLogCreateWithoutCameraInput[] | ActivityLogUncheckedCreateWithoutCameraInput[]
+    connectOrCreate?: ActivityLogCreateOrConnectWithoutCameraInput | ActivityLogCreateOrConnectWithoutCameraInput[]
+    upsert?: ActivityLogUpsertWithWhereUniqueWithoutCameraInput | ActivityLogUpsertWithWhereUniqueWithoutCameraInput[]
+    createMany?: ActivityLogCreateManyCameraInputEnvelope
+    set?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    disconnect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    delete?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    update?: ActivityLogUpdateWithWhereUniqueWithoutCameraInput | ActivityLogUpdateWithWhereUniqueWithoutCameraInput[]
+    updateMany?: ActivityLogUpdateManyWithWhereWithoutCameraInput | ActivityLogUpdateManyWithWhereWithoutCameraInput[]
+    deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -7957,6 +8174,20 @@ export namespace Prisma {
     deleteMany?: AlertScalarWhereInput | AlertScalarWhereInput[]
   }
 
+  export type ActivityLogUncheckedUpdateManyWithoutCameraNestedInput = {
+    create?: XOR<ActivityLogCreateWithoutCameraInput, ActivityLogUncheckedCreateWithoutCameraInput> | ActivityLogCreateWithoutCameraInput[] | ActivityLogUncheckedCreateWithoutCameraInput[]
+    connectOrCreate?: ActivityLogCreateOrConnectWithoutCameraInput | ActivityLogCreateOrConnectWithoutCameraInput[]
+    upsert?: ActivityLogUpsertWithWhereUniqueWithoutCameraInput | ActivityLogUpsertWithWhereUniqueWithoutCameraInput[]
+    createMany?: ActivityLogCreateManyCameraInputEnvelope
+    set?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    disconnect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    delete?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+    update?: ActivityLogUpdateWithWhereUniqueWithoutCameraInput | ActivityLogUpdateWithWhereUniqueWithoutCameraInput[]
+    updateMany?: ActivityLogUpdateManyWithWhereWithoutCameraInput | ActivityLogUpdateManyWithWhereWithoutCameraInput[]
+    deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
+  }
+
   export type CameraCreateNestedOneWithoutZonesInput = {
     create?: XOR<CameraCreateWithoutZonesInput, CameraUncheckedCreateWithoutZonesInput>
     connectOrCreate?: CameraCreateOrConnectWithoutZonesInput
@@ -7977,10 +8208,6 @@ export namespace Prisma {
     connect?: CameraWhereUniqueInput
   }
 
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
   }
@@ -7993,6 +8220,12 @@ export namespace Prisma {
     update?: XOR<XOR<CameraUpdateToOneWithWhereWithoutAlertsInput, CameraUpdateWithoutAlertsInput>, CameraUncheckedUpdateWithoutAlertsInput>
   }
 
+  export type CameraCreateNestedOneWithoutActivityLogsInput = {
+    create?: XOR<CameraCreateWithoutActivityLogsInput, CameraUncheckedCreateWithoutActivityLogsInput>
+    connectOrCreate?: CameraCreateOrConnectWithoutActivityLogsInput
+    connect?: CameraWhereUniqueInput
+  }
+
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
   }
@@ -8003,6 +8236,14 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type CameraUpdateOneRequiredWithoutActivityLogsNestedInput = {
+    create?: XOR<CameraCreateWithoutActivityLogsInput, CameraUncheckedCreateWithoutActivityLogsInput>
+    connectOrCreate?: CameraCreateOrConnectWithoutActivityLogsInput
+    upsert?: CameraUpsertWithoutActivityLogsInput
+    connect?: CameraWhereUniqueInput
+    update?: XOR<XOR<CameraUpdateToOneWithWhereWithoutActivityLogsInput, CameraUpdateWithoutActivityLogsInput>, CameraUncheckedUpdateWithoutActivityLogsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -8099,42 +8340,6 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
   export type NestedIntNullableFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -8144,6 +8349,34 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -8233,7 +8466,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
   }
@@ -8243,7 +8476,7 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
   }
@@ -8255,6 +8488,33 @@ export namespace Prisma {
 
   export type AlertCreateManyCameraInputEnvelope = {
     data: AlertCreateManyCameraInput | AlertCreateManyCameraInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ActivityLogCreateWithoutCameraInput = {
+    workerId: string
+    action: string
+    startTime: Date | string
+    endTime?: Date | string | null
+    duration?: number | null
+  }
+
+  export type ActivityLogUncheckedCreateWithoutCameraInput = {
+    id?: number
+    workerId: string
+    action: string
+    startTime: Date | string
+    endTime?: Date | string | null
+    duration?: number | null
+  }
+
+  export type ActivityLogCreateOrConnectWithoutCameraInput = {
+    where: ActivityLogWhereUniqueInput
+    create: XOR<ActivityLogCreateWithoutCameraInput, ActivityLogUncheckedCreateWithoutCameraInput>
+  }
+
+  export type ActivityLogCreateManyCameraInputEnvelope = {
+    data: ActivityLogCreateManyCameraInput | ActivityLogCreateManyCameraInput[]
     skipDuplicates?: boolean
   }
 
@@ -8309,23 +8569,56 @@ export namespace Prisma {
     type?: StringFilter<"Alert"> | string
     severity?: StringFilter<"Alert"> | string
     message?: StringFilter<"Alert"> | string
-    snapshot?: StringNullableFilter<"Alert"> | string | null
+    snapshot?: StringFilter<"Alert"> | string
     isResolved?: BoolFilter<"Alert"> | boolean
     createdAt?: DateTimeFilter<"Alert"> | Date | string
     cameraId?: IntFilter<"Alert"> | number
   }
 
+  export type ActivityLogUpsertWithWhereUniqueWithoutCameraInput = {
+    where: ActivityLogWhereUniqueInput
+    update: XOR<ActivityLogUpdateWithoutCameraInput, ActivityLogUncheckedUpdateWithoutCameraInput>
+    create: XOR<ActivityLogCreateWithoutCameraInput, ActivityLogUncheckedCreateWithoutCameraInput>
+  }
+
+  export type ActivityLogUpdateWithWhereUniqueWithoutCameraInput = {
+    where: ActivityLogWhereUniqueInput
+    data: XOR<ActivityLogUpdateWithoutCameraInput, ActivityLogUncheckedUpdateWithoutCameraInput>
+  }
+
+  export type ActivityLogUpdateManyWithWhereWithoutCameraInput = {
+    where: ActivityLogScalarWhereInput
+    data: XOR<ActivityLogUpdateManyMutationInput, ActivityLogUncheckedUpdateManyWithoutCameraInput>
+  }
+
+  export type ActivityLogScalarWhereInput = {
+    AND?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
+    OR?: ActivityLogScalarWhereInput[]
+    NOT?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
+    id?: IntFilter<"ActivityLog"> | number
+    workerId?: StringFilter<"ActivityLog"> | string
+    action?: StringFilter<"ActivityLog"> | string
+    startTime?: DateTimeFilter<"ActivityLog"> | Date | string
+    endTime?: DateTimeNullableFilter<"ActivityLog"> | Date | string | null
+    duration?: IntNullableFilter<"ActivityLog"> | number | null
+    cameraId?: IntFilter<"ActivityLog"> | number
+  }
+
   export type CameraCreateWithoutZonesInput = {
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertCreateNestedManyWithoutCameraInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutCameraInput
   }
 
   export type CameraUncheckedCreateWithoutZonesInput = {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertUncheckedCreateNestedManyWithoutCameraInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutCameraInput
   }
 
   export type CameraCreateOrConnectWithoutZonesInput = {
@@ -8347,27 +8640,35 @@ export namespace Prisma {
   export type CameraUpdateWithoutZonesInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertUpdateManyWithoutCameraNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutCameraNestedInput
   }
 
   export type CameraUncheckedUpdateWithoutZonesInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     alerts?: AlertUncheckedUpdateManyWithoutCameraNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutCameraNestedInput
   }
 
   export type CameraCreateWithoutAlertsInput = {
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneCreateNestedManyWithoutCameraInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutCameraInput
   }
 
   export type CameraUncheckedCreateWithoutAlertsInput = {
     id?: number
     name: string
     status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedCreateNestedManyWithoutCameraInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutCameraInput
   }
 
   export type CameraCreateOrConnectWithoutAlertsInput = {
@@ -8389,14 +8690,68 @@ export namespace Prisma {
   export type CameraUpdateWithoutAlertsInput = {
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUpdateManyWithoutCameraNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutCameraNestedInput
   }
 
   export type CameraUncheckedUpdateWithoutAlertsInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
     zones?: ZoneUncheckedUpdateManyWithoutCameraNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutCameraNestedInput
+  }
+
+  export type CameraCreateWithoutActivityLogsInput = {
+    name: string
+    status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
+    zones?: ZoneCreateNestedManyWithoutCameraInput
+    alerts?: AlertCreateNestedManyWithoutCameraInput
+  }
+
+  export type CameraUncheckedCreateWithoutActivityLogsInput = {
+    id?: number
+    name: string
+    status?: string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
+    zones?: ZoneUncheckedCreateNestedManyWithoutCameraInput
+    alerts?: AlertUncheckedCreateNestedManyWithoutCameraInput
+  }
+
+  export type CameraCreateOrConnectWithoutActivityLogsInput = {
+    where: CameraWhereUniqueInput
+    create: XOR<CameraCreateWithoutActivityLogsInput, CameraUncheckedCreateWithoutActivityLogsInput>
+  }
+
+  export type CameraUpsertWithoutActivityLogsInput = {
+    update: XOR<CameraUpdateWithoutActivityLogsInput, CameraUncheckedUpdateWithoutActivityLogsInput>
+    create: XOR<CameraCreateWithoutActivityLogsInput, CameraUncheckedCreateWithoutActivityLogsInput>
+    where?: CameraWhereInput
+  }
+
+  export type CameraUpdateToOneWithWhereWithoutActivityLogsInput = {
+    where?: CameraWhereInput
+    data: XOR<CameraUpdateWithoutActivityLogsInput, CameraUncheckedUpdateWithoutActivityLogsInput>
+  }
+
+  export type CameraUpdateWithoutActivityLogsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
+    zones?: ZoneUpdateManyWithoutCameraNestedInput
+    alerts?: AlertUpdateManyWithoutCameraNestedInput
+  }
+
+  export type CameraUncheckedUpdateWithoutActivityLogsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    calibrationData?: NullableJsonNullValueInput | InputJsonValue
+    zones?: ZoneUncheckedUpdateManyWithoutCameraNestedInput
+    alerts?: AlertUncheckedUpdateManyWithoutCameraNestedInput
   }
 
   export type ZoneCreateManyCameraInput = {
@@ -8411,9 +8766,18 @@ export namespace Prisma {
     type: string
     severity: string
     message: string
-    snapshot?: string | null
+    snapshot: string
     isResolved?: boolean
     createdAt?: Date | string
+  }
+
+  export type ActivityLogCreateManyCameraInput = {
+    id?: number
+    workerId: string
+    action: string
+    startTime: Date | string
+    endTime?: Date | string | null
+    duration?: number | null
   }
 
   export type ZoneUpdateWithoutCameraInput = {
@@ -8440,7 +8804,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8450,7 +8814,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8460,9 +8824,35 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     severity?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    snapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    snapshot?: StringFieldUpdateOperationsInput | string
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogUpdateWithoutCameraInput = {
+    workerId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type ActivityLogUncheckedUpdateWithoutCameraInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    workerId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type ActivityLogUncheckedUpdateManyWithoutCameraInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    workerId?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
 

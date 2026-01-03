@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -29,9 +23,12 @@ model Camera {
   id        Int      @id @default(autoincrement())
   name      String   // e.g., "Packing Station 1"
   status    String   @default("ONLINE")
+  calibrationData Json? // NEW FIELD: Stores the 4 point pairs for calibration
+  // Format: { "video": [[x,y], [x,y]...], "map": [[x,y], [x,y]...] }
 
   zones     Zone[]
   alerts    Alert[]
+  activityLogs ActivityLog[]
 }
 
 model Zone {
@@ -49,7 +46,7 @@ model Alert {
   type        String   // "PPE_VIOLATION", "ZONE_INTRUSION", "IDLE_WORKER"
   severity    String   // "HIGH", "MEDIUM" , "NORMAL"
   message     String   // "Worker detected without vest in Zone A"
-  snapshot    String?  // URL to image
+  snapshot    String  // URL to image
   isResolved  Boolean  @default(false)
   createdAt   DateTime @default(now())
   
@@ -66,4 +63,5 @@ model ActivityLog {
   duration    Int?     // Duration in seconds (filled when action ends)
   
   cameraId    Int
+  camera      Camera   @relation(fields: [cameraId], references: [id])
 }
