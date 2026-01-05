@@ -2,12 +2,12 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-cyan-500/5 to-purple-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-linear-to-r from-cyan-500/5 to-purple-500/5 rounded-full blur-3xl animate-pulse" />
       </div>
 
       {/* Content */}
@@ -21,7 +21,7 @@ export default function Home() {
         {/* Title */}
         <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
           OptiVision{" "}
-          <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
             AI
           </span>
         </h1>
@@ -35,7 +35,7 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/login"
-            className="px-8 py-3.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-105"
+            className="px-8 py-3.5 bg-linear-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-105"
           >
             Sign In
           </Link>
