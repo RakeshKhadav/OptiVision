@@ -1,0 +1,22 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Floor -->
+  <rect width="800" height="600" fill="#1e293b" />
+  
+  <!-- Grid Lines -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#grid)" />
+
+  <!-- Walls -->
+  <path d="M 50 50 L 750 50 L 750 550 L 50 550 Z" fill="none" stroke="#94a3b8" stroke-width="4" />
+  
+  <!-- Zones (Static markers for context) -->
+  <rect x="100" y="100" width="150" height="100" fill="#3b82f6" fill-opacity="0.2" stroke="#3b82f6" stroke-dasharray="4" />
+  <text x="175" y="150" fill="#3b82f6" font-family="sans-serif" font-size="14" text-anchor="middle">Processing Area</text>
+  
+  <rect x="550" y="400" width="150" height="100" fill="#ef4444" fill-opacity="0.2" stroke="#ef4444" stroke-dasharray="4" />
+  <text x="625" y="450" fill="#ef4444" font-family="sans-serif" font-size="14" text-anchor="middle">Hazard Zone</text>
+</svg>
