@@ -14,7 +14,10 @@ const app = express();
 
 // CORS middleware
 const frontendUrl = process.env.FRONTEND_URL;
-const allowedOrigins = frontendUrl ? frontendUrl.split(',').map((origin) => origin.trim()) : [];
+const allowedOrigins = [
+  'http://localhost:3000',
+  ...(frontendUrl ? frontendUrl.split(',').map((origin) => origin.trim()) : []),
+];
 
 app.use(
   cors({
