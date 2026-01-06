@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { api } from "@/lib/api";
+import { socket } from "@/lib/socket";
 
 interface ActivityStat {
     action: string;
@@ -10,10 +11,20 @@ interface ActivityStat {
     };
 }
 
+interface ChartData {
+    name: string;
+    value: number;
+    [key: string]: string | number; // Index signature for Recharts compatibility
+}
+
+interface ProductivityChartProps {
+    initialData?: ChartData[];
+}
+
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-export default function ProductivityChart() {
-    const [data, setData] = useState<{ name: string; value: number }[]>([]);
+export default function ProductivityChart({ initialData = [] }: ProductivityChartProps) {
+    const [data, setData] = useState<ChartData[]>(initialData);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -31,10 +42,24 @@ export default function ProductivityChart() {
             }
         };
 
-        fetchStats();
-        // Refresh every minute
+        // Listen for real-time updates via socket
+        socket.on("activity_log_stats", (newData: any) => {
+            if (newData.activityStats) {
+                const chartData = newData.activityStats.map((stat: ActivityStat) => ({
+                    name: stat.action,
+                    value: stat._sum.duration || 0
+                }));
+                setData(chartData);
+            }
+        });
+
+        // Refresh every minute for live updates (fallback)
         const interval = setInterval(fetchStats, 60000);
-        return () => clearInterval(interval);
+
+        return () => {
+            socket.off("activity_log_stats");
+            clearInterval(interval);
+        };
     }, []);
 
     if (data.length === 0) {

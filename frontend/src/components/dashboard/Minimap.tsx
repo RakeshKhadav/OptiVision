@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useMemo } from "react";
 import { applyHomography, computeHomography } from "@/lib/homography";
 
 interface MinimapProps {
@@ -11,18 +11,14 @@ interface MinimapProps {
 }
 
 export default function Minimap({ detections, calibrationData }: MinimapProps) {
-    const [homographyMatrix, setHomographyMatrix] = useState<number[] | null>(null);
-
-    // Calculate matrix when calibration data changes
-    useEffect(() => {
+    // Derive homography matrix from calibration data using useMemo
+    // This is more idiomatic than useEffect + useState for derived values
+    const homographyMatrix = useMemo(() => {
         if (calibrationData && calibrationData.video && calibrationData.map) {
-            const H = computeHomography(calibrationData.video, calibrationData.map);
-            setHomographyMatrix(H);
-        } else {
-            // Default / Identity-ish backup if no calibration
-            // (Assuming 1280x720 video maps roughly to 800x600 map for demo)
-            setHomographyMatrix(null);
+            return computeHomography(calibrationData.video, calibrationData.map);
         }
+        // Return null if no calibration - will use fallback linear mapping
+        return null;
     }, [calibrationData]);
 
     return (

@@ -5,18 +5,63 @@ import { useSocket } from "@/hooks/useSocket";
 import { useTrails } from "@/hooks/useTrails";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { api } from "@/lib/api";
 import LiveFeed from "@/components/dashboard/LiveFeed";
 import Minimap from "@/components/dashboard/Minimap";
 import ProductivityChart from "@/components/dashboard/ProductivityChart";
 import SnapshotModal from "@/components/dashboard/SnapshotModal";
 
+interface Camera {
+    id: number;
+    name: string;
+    status: string;
+    calibrationData: any;
+}
+
+interface ChartData {
+    name: string;
+    value: number;
+    [key: string]: string | number;
+}
+
 export default function Dashboard() {
     const router = useRouter();
-    const { token, user, logout, hydrateFromStorage } = useAuthStore();
+    const { token, user, logout } = useAuthStore();
     const { activeCameraId, showTrails, toggleTrails, isPrivacyMode, setPrivacyMode, alerts } = useDashboardStore();
     const { isConnected, frame, detections } = useSocket(activeCameraId);
     const trails = useTrails(detections);
     const [selectedAlert, setSelectedAlert] = useState<any | null>(null);
+
+    // Initial data for components - fetched once
+    const [initialCameras, setInitialCameras] = useState<Camera[]>([]);
+    const [initialChartData, setInitialChartData] = useState<ChartData[]>([]);
+
+    // Fetch initial data on mount
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                // Fetch cameras
+                const camerasRes = await api.get("/cameras");
+                if (camerasRes.data.success) {
+                    setInitialCameras(camerasRes.data.data);
+                }
+
+                // Fetch activity stats
+                const statsRes = await api.get("/activity/stats");
+                if (statsRes.data.success && statsRes.data.data.activityStats) {
+                    const chartData = statsRes.data.data.activityStats.map((stat: any) => ({
+                        name: stat.action,
+                        value: stat._sum.duration || 0
+                    }));
+                    setInitialChartData(chartData);
+                }
+            } catch (error) {
+                console.error("Failed to fetch initial data:", error);
+            }
+        };
+
+        fetchInitialData();
+    }, []);
 
     const handleLogout = () => {
         logout();
@@ -94,7 +139,7 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between mb-2">
                             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Worker Activity</h2>
                         </div>
-                        <ProductivityChart />
+                        <ProductivityChart initialData={initialChartData} />
                     </div>
 
                     <div className="flex-1 bg-slate-900 rounded-xl border border-slate-800 p-4 shadow-xl overflow-hidden flex flex-col">

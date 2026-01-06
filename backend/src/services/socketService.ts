@@ -31,6 +31,24 @@ export const initSocket = (server: HTTPServer) => {
       socket.volatile.broadcast.emit('stream_feed', data);
     });
 
+    // Relay alerts from AI to frontend
+    socket.on('alert', (data: any) => {
+      console.log('Relaying alert:', data.type);
+      io!.emit('alert', data);
+    });
+
+    // Relay activity logs from AI to frontend
+    socket.on('activity_log', (data: any) => {
+      console.log('Relaying activity log:', data.action);
+      io!.emit('activity_log', data);
+    });
+
+    // Relay activity stats from AI to frontend
+    socket.on('activity_stats', (data: any) => {
+      console.log('Relaying activity stats update');
+      io!.emit('activity_log_stats', data);
+    });
+
     socket.on('disconnect', () => {
       console.log(`User disconnected: ${socket.id}`);
     });
