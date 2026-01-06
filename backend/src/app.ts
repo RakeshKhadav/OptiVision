@@ -16,6 +16,7 @@ const app = express();
 const frontendUrl = process.env.FRONTEND_URL;
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:3001',
   ...(frontendUrl ? frontendUrl.split(',').map((origin) => origin.trim()) : []),
 ];
 
