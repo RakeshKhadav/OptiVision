@@ -1,15 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { api } from "@/lib/api";
+import { activityService, ActivityStat } from "@/services/activityService";
 import { socket } from "@/lib/socket";
-
-interface ActivityStat {
-    action: string;
-    _sum: {
-        duration: number | null;
-    };
-}
 
 interface ChartData {
     name: string;
@@ -27,11 +20,15 @@ export default function ProductivityChart({ initialData = [] }: ProductivityChar
     const [data, setData] = useState<ChartData[]>(initialData);
 
     useEffect(() => {
+        if (initialData.length > 0) {
+            setData(initialData);
+        }
+
         const fetchStats = async () => {
             try {
-                const res = await api.get("/activity/stats");
-                if (res.data.success && res.data.data.activityStats) {
-                    const chartData = res.data.data.activityStats.map((stat: ActivityStat) => ({
+                const resData = await activityService.getActivityStats();
+                if (resData.success && resData.data.activityStats) {
+                    const chartData = resData.data.activityStats.map((stat: ActivityStat) => ({
                         name: stat.action,
                         value: stat._sum.duration || 0
                     }));
@@ -60,7 +57,7 @@ export default function ProductivityChart({ initialData = [] }: ProductivityChar
             socket.off("activity_log_stats");
             clearInterval(interval);
         };
-    }, []);
+    }, [initialData]);
 
     if (data.length === 0) {
         return (

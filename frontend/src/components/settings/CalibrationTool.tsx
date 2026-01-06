@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { api } from "@/lib/api";
+import { cameraService } from "@/services/cameraService";
 
 interface CalibrationToolProps {
     cameraId: number;
@@ -20,18 +20,18 @@ export default function CalibrationTool({ cameraId, frame, existingCalibration, 
 
     const handleVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (step !== "VIDEO" || videoPoints.length >= 4) return;
-        
+
         const rect = e.currentTarget.getBoundingClientRect();
         // Calculate coordinate relative to the image's natural size (assuming 1280x720 for now or scaling)
         // Ideally we should scale based on rendered vs natural size.
         // For this MVP, let's assume we want coordinates relative to the 1280x720 frame.
-        
+
         const scaleX = 1280 / rect.width;
         const scaleY = 720 / rect.height;
-        
+
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
-        
+
         setVideoPoints([...videoPoints, [x, y]]);
     };
 
@@ -52,7 +52,7 @@ export default function CalibrationTool({ cameraId, frame, existingCalibration, 
     const saveCalibration = async () => {
         setIsSaving(true);
         try {
-            await api.put(`/cameras/${cameraId}`, {
+            await cameraService.updateCamera(cameraId, {
                 calibrationData: {
                     video: videoPoints,
                     map: mapPoints
@@ -80,8 +80,8 @@ export default function CalibrationTool({ cameraId, frame, existingCalibration, 
                 <h3 className="text-lg font-semibold text-white">Camera Calibration (Homography)</h3>
                 <div className="space-x-2">
                     <button onClick={reset} className="px-3 py-1 text-xs bg-slate-800 rounded hover:bg-slate-700">Reset</button>
-                    <button 
-                        onClick={saveCalibration} 
+                    <button
+                        onClick={saveCalibration}
                         disabled={videoPoints.length !== 4 || mapPoints.length !== 4 || isSaving}
                         className="px-3 py-1 text-xs bg-cyan-600 rounded hover:bg-cyan-500 disabled:opacity-50"
                     >
@@ -97,27 +97,27 @@ export default function CalibrationTool({ cameraId, frame, existingCalibration, 
                         <span>Step 1: Click 4 points on Video</span>
                         <span>{videoPoints.length}/4</span>
                     </div>
-                    <div 
+                    <div
                         className="relative aspect-video bg-black rounded border border-slate-700 cursor-crosshair overflow-hidden"
                         onClick={handleVideoClick}
                     >
-                         {frame && (
-                            <img 
+                        {frame && (
+                            <img
                                 ref={videoRef}
-                                src={`data:image/jpeg;base64,${frame}`} 
-                                className="w-full h-full object-contain pointer-events-none" 
+                                src={`data:image/jpeg;base64,${frame}`}
+                                className="w-full h-full object-contain pointer-events-none"
                             />
                         )}
                         {videoPoints.map((pt, i) => (
-                            <div 
-                                key={i} 
+                            <div
+                                key={i}
                                 className="absolute w-4 h-4 bg-red-500 rounded-full border-2 border-white -translate-x-1/2 -translate-y-1/2 flex items-center justify-center text-[8px] font-bold"
-                                style={{ 
-                                    left: `${(pt[0]/1280)*100}%`, 
-                                    top: `${(pt[1]/720)*100}%` 
+                                style={{
+                                    left: `${(pt[0] / 1280) * 100}%`,
+                                    top: `${(pt[1] / 720) * 100}%`
                                 }}
                             >
-                                {i+1}
+                                {i + 1}
                             </div>
                         ))}
                     </div>
@@ -132,25 +132,25 @@ export default function CalibrationTool({ cameraId, frame, existingCalibration, 
                         <span>Step 2: Click matching 4 points on Map</span>
                         <span>{mapPoints.length}/4</span>
                     </div>
-                    <div 
-                        className="relative aspect-[4/3] bg-slate-900 rounded border border-slate-700 cursor-crosshair overflow-hidden"
+                    <div
+                        className="relative aspect-4/3 bg-slate-900 rounded border border-slate-700 cursor-crosshair overflow-hidden"
                         onClick={handleMapClick}
                     >
-                        <img 
+                        <img
                             ref={mapRef}
-                            src="/floorplan-base.svg" 
-                            className="w-full h-full object-cover pointer-events-none" 
+                            src="/floorplan-base.svg"
+                            className="w-full h-full object-cover pointer-events-none"
                         />
-                         {mapPoints.map((pt, i) => (
-                            <div 
-                                key={i} 
+                        {mapPoints.map((pt, i) => (
+                            <div
+                                key={i}
                                 className="absolute w-4 h-4 bg-blue-500 rounded-full border-2 border-white -translate-x-1/2 -translate-y-1/2 flex items-center justify-center text-[8px] font-bold"
-                                style={{ 
-                                    left: `${(pt[0]/800)*100}%`, 
-                                    top: `${(pt[1]/600)*100}%` 
+                                style={{
+                                    left: `${(pt[0] / 800) * 100}%`,
+                                    top: `${(pt[1] / 600) * 100}%`
                                 }}
                             >
-                                {i+1}
+                                {i + 1}
                             </div>
                         ))}
                     </div>
