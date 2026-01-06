@@ -12,6 +12,8 @@ import Minimap from "@/components/dashboard/Minimap";
 import ProductivityChart from "@/components/dashboard/ProductivityChart";
 import SnapshotModal from "@/components/dashboard/SnapshotModal";
 import CameraSelector from "@/components/dashboard/CameraSelector";
+import Link from "next/link";
+import HorizontalTimeline from "@/components/dashboard/HorizontalTimeline";
 
 interface ChartData {
     name: string;
@@ -113,6 +115,12 @@ export default function Dashboard() {
                         >
                             Logout
                         </button>
+                        <Link
+                            href="/settings"
+                            className="px-3 py-1.5 rounded text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all"
+                        >
+                            Settings
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -128,6 +136,11 @@ export default function Dashboard() {
                             trails={trails}
                         />
                     </div>
+
+                    <HorizontalTimeline
+                        alerts={alerts}
+                        onAlertClick={(alert) => setSelectedAlert(alert)}
+                    />
                 </div>
 
                 <div className="col-span-12 lg:col-span-3 flex flex-col gap-6">
@@ -146,41 +159,6 @@ export default function Dashboard() {
                             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Worker Activity</h2>
                         </div>
                         <ProductivityChart initialData={initialChartData} />
-                    </div>
-
-                    <div className="flex-1 bg-slate-900 rounded-xl border border-slate-800 p-4 shadow-xl overflow-hidden flex flex-col">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Incident Timeline</h2>
-                            <span className="bg-red-500/20 text-red-500 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30">
-                                {alerts.length} New
-                            </span>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800">
-                            {alerts.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center opacity-20">
-                                    <p className="text-xs text-center mt-2">Awaiting AI events...</p>
-                                </div>
-                            ) : (
-                                alerts.map((alert) => (
-                                    <div
-                                        key={alert.id}
-                                        onClick={() => setSelectedAlert(alert)}
-                                        className={`p-3 rounded-lg border bg-slate-950/50 transition-all hover:translate-x-1 cursor-pointer ${alert.severity === 'HIGH' ? 'border-red-500/30 hover:border-red-500' : 'border-slate-800 hover:border-slate-700'}`}
-                                    >
-                                        <div className="flex justify-between items-start mb-1">
-                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${alert.severity === 'HIGH' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                                                {alert.type}
-                                            </span>
-                                            <span className="text-[10px] text-slate-500">
-                                                {new Date(alert.createdAt).toLocaleTimeString()}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-slate-300 leading-relaxed truncate">{alert.message}</p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
                     </div>
                 </div>
             </div>

@@ -44,7 +44,7 @@ export default function SnapshotModal({ alert, onClose }: SnapshotModalProps) {
                             </p>
                         </div>
                     </div>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="text-slate-400 hover:text-white transition-colors"
                     >
@@ -57,9 +57,9 @@ export default function SnapshotModal({ alert, onClose }: SnapshotModalProps) {
                     {/* Snapshot Image */}
                     <div className="relative aspect-video bg-black rounded-lg border border-slate-800 overflow-hidden mb-4 group">
                         {alert.snapshot ? (
-                            <img 
-                                src={alert.snapshot} 
-                                alt="Incident Snapshot" 
+                            <img
+                                src={alert.snapshot}
+                                alt="Incident Snapshot"
                                 className="w-full h-full object-contain"
                             />
                         ) : (
@@ -97,17 +97,11 @@ export default function SnapshotModal({ alert, onClose }: SnapshotModalProps) {
 
                 {/* Footer */}
                 <div className="p-4 border-t border-slate-800 bg-slate-900 flex justify-end gap-3">
-                    <button 
+                    <button
                         onClick={onClose}
                         className="px-4 py-2 rounded text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                     >
                         Close
-                    </button>
-                    <button 
-                        className="px-4 py-2 rounded text-sm font-medium bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-500/20 transition-all"
-                        onClick={() => alert('Resolution logic to be implemented')}
-                    >
-                        Mark Resolved
                     </button>
                 </div>
             </div>
