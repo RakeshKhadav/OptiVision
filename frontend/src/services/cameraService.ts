@@ -19,7 +19,7 @@ export const cameraService = {
   },
 
   updateCamera: async (id: number, data: any) => {
-    const response = await api.put(`/cameras/${id}`, data);
+    const response = await api.patch(`/cameras/${id}`, data);
     return response.data;
   },
 };

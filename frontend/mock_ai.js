@@ -6,10 +6,19 @@ console.log("🚀 Mock AI Engine Starting...");
 
 let frameCount = 0;
 let intervalsStarted = false;
+let privacyMode = false;
 
 const startMockAI = () => {
   if (intervalsStarted) return;
   intervalsStarted = true;
+
+  // Listen for privacy mode toggle from backend
+  socket.on("settings_update", (data) => {
+    console.log("🛠️ Mock AI: Settings Updated", data);
+    if (typeof data.privacyMode === "boolean") {
+      privacyMode = data.privacyMode;
+    }
+  });
 
   // 1. High-frequency stream (10 FPS)
   setInterval(() => {
@@ -18,7 +27,7 @@ const startMockAI = () => {
 
     const boxes = [
       {
-        workerId: "worker_1",
+        workerId: privacyMode ? "HIDDEN" : "worker_1",
         label: "Person",
         confidence: 0.98,
         x: 640 + Math.cos(frameCount * 0.1) * 200,
@@ -27,7 +36,7 @@ const startMockAI = () => {
         height: 100
       },
       {
-        workerId: "worker_2",
+        workerId: privacyMode ? "HIDDEN" : "worker_2",
         label: "Person",
         confidence: 0.96,
         x: 300 + Math.cos(frameCount * 0.05) * 100,
@@ -46,8 +55,13 @@ const startMockAI = () => {
       }
     ];
 
+    // Simulate blurred frame by using a different placeholder color if privacyMode is on
+    const base64Image = privacyMode
+      ? "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+C/PwAJCgNPe+7XGAAAAABJRU5ErkJggg==" // Greyish
+      : "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="; // Solid
+
     socket.emit("stream_data", {
-      image: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+      image: base64Image,
       boxes
     });
 
