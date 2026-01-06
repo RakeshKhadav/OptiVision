@@ -1,13 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { api } from "@/lib/api";
-
-interface Zone {
-    id: number;
-    name: string;
-    type: "DANGER" | "SAFE" | "RESTRICTED";
-    coordinates: string; // JSON string of number[][]
-}
+import { zoneService, Zone } from "@/services/zoneService";
 
 interface ZoneEditorProps {
     cameraId: number;
@@ -27,10 +20,10 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
 
     const fetchZones = async () => {
         try {
-            const res = await api.get("/zones"); // Ideally filter by camera
-            if (res.data.success) {
+            const data = await zoneService.getZones();
+            if (data.success) {
                 // Client-side filtering if backend doesn't support it yet
-                const cameraZones = res.data.data.filter((z: any) => z.cameraId === cameraId);
+                const cameraZones = data.data.filter((z: any) => z.cameraId === cameraId);
                 setZones(cameraZones);
             }
         } catch (error) {
@@ -54,15 +47,15 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
         if (currentPoints.length < 3 || !zoneName) return;
 
         try {
-            const res = await api.post("/zones", {
+            const data = await zoneService.createZone({
                 name: zoneName,
                 type: zoneType,
                 coordinates: JSON.stringify(currentPoints),
                 cameraId
             });
-            
-            if (res.data.success) {
-                setZones([...zones, res.data.data]);
+
+            if (data.success) {
+                setZones([...zones, data.data]);
                 cancelDrawing();
             }
         } catch (error) {
@@ -74,7 +67,7 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
     const deleteZone = async (id: number) => {
         if (!confirm("Are you sure?")) return;
         try {
-            await api.delete(`/zones/${id}`);
+            await zoneService.deleteZone(id);
             setZones(zones.filter(z => z.id !== id));
         } catch (error) {
             console.error("Failed to delete zone", error);
@@ -89,10 +82,10 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
 
     return (
         <div className="space-y-6">
-             <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-white">Zone Management</h3>
                 {!isDrawing ? (
-                    <button 
+                    <button
                         onClick={() => setIsDrawing(true)}
                         className="px-3 py-1.5 bg-cyan-600 rounded text-xs font-medium hover:bg-cyan-500"
                     >
@@ -100,23 +93,23 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
                     </button>
                 ) : (
                     <div className="flex gap-2">
-                         <button onClick={cancelDrawing} className="px-3 py-1.5 bg-slate-700 rounded text-xs">Cancel</button>
-                         <button onClick={saveZone} className="px-3 py-1.5 bg-green-600 rounded text-xs">Save Zone</button>
+                        <button onClick={cancelDrawing} className="px-3 py-1.5 bg-slate-700 rounded text-xs">Cancel</button>
+                        <button onClick={saveZone} className="px-3 py-1.5 bg-green-600 rounded text-xs">Save Zone</button>
                     </div>
                 )}
             </div>
 
             {isDrawing && (
                 <div className="flex gap-4 p-4 bg-slate-900 rounded border border-slate-800">
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         placeholder="Zone Name (e.g., 'Loading Dock')"
                         className="bg-slate-950 border border-slate-700 rounded px-3 py-1 text-sm text-white focus:outline-none focus:border-cyan-500"
                         value={zoneName}
                         onChange={e => setZoneName(e.target.value)}
                     />
-                    <select 
-                        value={zoneType} 
+                    <select
+                        value={zoneType}
                         onChange={e => setZoneType(e.target.value as any)}
                         className="bg-slate-950 border border-slate-700 rounded px-3 py-1 text-sm text-white focus:outline-none focus:border-cyan-500"
                     >
@@ -130,15 +123,15 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
                 </div>
             )}
 
-            <div 
+            <div
                 className="relative aspect-video bg-black rounded border border-slate-700 overflow-hidden cursor-crosshair"
                 onClick={handleCanvasClick}
             >
                 {/* Background Frame */}
                 {frame && (
-                    <img 
-                        src={`data:image/jpeg;base64,${frame}`} 
-                        className="w-full h-full object-contain pointer-events-none" 
+                    <img
+                        src={`data:image/jpeg;base64,${frame}`}
+                        className="w-full h-full object-contain pointer-events-none"
                     />
                 )}
 
@@ -148,27 +141,27 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
                         const pts = JSON.parse(zone.coordinates);
                         const pathData = `M ${pts.map((p: any) => p.join(" ")).join(" L ")} Z`;
                         const color = zone.type === "DANGER" ? "red" : zone.type === "SAFE" ? "green" : "orange";
-                        
+
                         return (
-                            <path 
-                                key={zone.id} 
-                                d={pathData} 
-                                fill={color} 
-                                fillOpacity="0.2" 
-                                stroke={color} 
+                            <path
+                                key={zone.id}
+                                d={pathData}
+                                fill={color}
+                                fillOpacity="0.2"
+                                stroke={color}
                                 strokeWidth="2"
                             />
                         );
                     })}
-                    
+
                     {/* Current Drawing */}
                     {currentPoints.length > 0 && (
                         <>
-                            <path 
-                                d={`M ${currentPoints.map(p => p.join(" ")).join(" L ")}`} 
-                                fill="none" 
-                                stroke="white" 
-                                strokeWidth="2" 
+                            <path
+                                d={`M ${currentPoints.map(p => p.join(" ")).join(" L ")}`}
+                                fill="none"
+                                stroke="white"
+                                strokeWidth="2"
                                 strokeDasharray="4"
                             />
                             {currentPoints.map((p, i) => (
@@ -178,7 +171,7 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
                     )}
                 </svg>
             </div>
-            
+
             <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Active Zones</h4>
                 {zones.length === 0 && <p className="text-xs text-slate-500">No zones defined.</p>}
@@ -186,16 +179,15 @@ export default function ZoneEditor({ cameraId, frame }: ZoneEditorProps) {
                     {zones.map(zone => (
                         <div key={zone.id} className="flex justify-between items-center p-2 bg-slate-900 rounded border border-slate-800">
                             <div>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded mr-2 ${
-                                    zone.type === "DANGER" ? "bg-red-500/20 text-red-500" : 
-                                    zone.type === "SAFE" ? "bg-green-500/20 text-green-500" : 
-                                    "bg-amber-500/20 text-amber-500"
-                                }`}>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded mr-2 ${zone.type === "DANGER" ? "bg-red-500/20 text-red-500" :
+                                        zone.type === "SAFE" ? "bg-green-500/20 text-green-500" :
+                                            "bg-amber-500/20 text-amber-500"
+                                    }`}>
                                     {zone.type}
                                 </span>
                                 <span className="text-sm text-slate-300">{zone.name}</span>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => deleteZone(zone.id)}
                                 className="text-xs text-red-400 hover:text-red-300 px-2"
                             >

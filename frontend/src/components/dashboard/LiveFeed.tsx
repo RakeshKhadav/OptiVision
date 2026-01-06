@@ -15,10 +15,11 @@ interface LiveFeedProps {
     frame: string;
     detections: Detection[];
     showTrails?: boolean;
+    isPrivacyMode?: boolean;
     trails?: Record<string, { x: number; y: number }[]>;
 }
 
-export default function LiveFeed({ frame, detections, showTrails, trails }: LiveFeedProps) {
+export default function LiveFeed({ frame, detections, showTrails, isPrivacyMode, trails }: LiveFeedProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -34,14 +35,14 @@ export default function LiveFeed({ frame, detections, showTrails, trails }: Live
         if (showTrails && trails) {
             Object.values(trails).forEach((path) => {
                 if (path.length < 2) return;
-                
+
                 ctx.beginPath();
                 ctx.moveTo(path[0].x, path[0].y);
-                
+
                 for (let i = 1; i < path.length; i++) {
                     ctx.lineTo(path[i].x, path[i].y);
                 }
-                
+
                 ctx.strokeStyle = "rgba(0, 243, 255, 0.5)";
                 ctx.lineWidth = 2;
                 ctx.stroke();
@@ -86,6 +87,17 @@ export default function LiveFeed({ frame, detections, showTrails, trails }: Live
                 height={720}
                 className="absolute inset-0 w-full h-full pointer-events-none"
             />
+
+            {/* Privacy Mode Overlay */}
+            {isPrivacyMode && (
+                <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-md flex items-center justify-center">
+                    <div className="bg-amber-500/20 border border-amber-500/50 px-6 py-3 rounded-xl flex flex-col items-center gap-2">
+                        <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(245,158,11,1)]" />
+                        <span className="text-amber-500 font-bold text-xs uppercase tracking-[0.2em]">Privacy Masking Active</span>
+                        <p className="text-[10px] text-amber-500/70 font-medium">PII is being redacted at the edge</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

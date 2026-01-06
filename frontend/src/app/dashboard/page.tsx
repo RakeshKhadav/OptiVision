@@ -5,18 +5,13 @@ import { useSocket } from "@/hooks/useSocket";
 import { useTrails } from "@/hooks/useTrails";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { api } from "@/lib/api";
+import { cameraService, Camera } from "@/services/cameraService";
+import { activityService } from "@/services/activityService";
 import LiveFeed from "@/components/dashboard/LiveFeed";
 import Minimap from "@/components/dashboard/Minimap";
 import ProductivityChart from "@/components/dashboard/ProductivityChart";
 import SnapshotModal from "@/components/dashboard/SnapshotModal";
-
-interface Camera {
-    id: number;
-    name: string;
-    status: string;
-    calibrationData: any;
-}
+import CameraSelector from "@/components/dashboard/CameraSelector";
 
 interface ChartData {
     name: string;
@@ -41,15 +36,17 @@ export default function Dashboard() {
         const fetchInitialData = async () => {
             try {
                 // Fetch cameras
-                const camerasRes = await api.get("/cameras");
-                if (camerasRes.data.success) {
-                    setInitialCameras(camerasRes.data.data);
+                const camerasData = await cameraService.getCameras();
+                if (camerasData.success) {
+                    setInitialCameras(camerasData.data);
+                    // Also sync with store if not already done
+                    useDashboardStore.getState().setCameras(camerasData.data);
                 }
 
                 // Fetch activity stats
-                const statsRes = await api.get("/activity/stats");
-                if (statsRes.data.success && statsRes.data.data.activityStats) {
-                    const chartData = statsRes.data.data.activityStats.map((stat: any) => ({
+                const statsData = await activityService.getActivityStats();
+                if (statsData.success && statsData.data.activityStats) {
+                    const chartData = statsData.data.activityStats.map((stat: any) => ({
                         name: stat.action,
                         value: stat._sum.duration || 0
                     }));
@@ -62,6 +59,10 @@ export default function Dashboard() {
 
         fetchInitialData();
     }, []);
+
+    const activeCamera = useDashboardStore((state) =>
+        state.cameras.find(c => c.id === state.activeCameraId) || initialCameras.find(c => c.id === state.activeCameraId)
+    );
 
     const handleLogout = () => {
         logout();
@@ -82,6 +83,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-6">
+                    <CameraSelector initialCameras={initialCameras} />
 
                     <div className="flex items-center gap-4 bg-slate-900/50 p-1.5 rounded-lg border border-slate-800">
                         <button
@@ -122,6 +124,7 @@ export default function Dashboard() {
                             frame={frame}
                             detections={detections}
                             showTrails={showTrails}
+                            isPrivacyMode={isPrivacyMode}
                             trails={trails}
                         />
                     </div>
@@ -131,7 +134,10 @@ export default function Dashboard() {
                     {/* Minimap Widget */}
                     <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 shadow-xl">
                         <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Digital Twin</h2>
-                        <Minimap detections={detections} />
+                        <Minimap
+                            detections={detections}
+                            calibrationData={activeCamera?.calibrationData}
+                        />
                     </div>
 
                     {/* Productivity Widget */}

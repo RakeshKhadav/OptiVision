@@ -1,6 +1,6 @@
 "use client";
 import { create } from "zustand";
-import { api } from "@/lib/api";
+import { userService } from "@/services/userService";
 
 interface User {
   id: string;
@@ -32,15 +32,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.post("/users/login", { email, password });
-      if (res.data.success) {
-        const { user, token } = res.data.data;
+      const data = await userService.login({ email, password });
+      if (data.success) {
+        const { user, token } = data.data;
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
         set({ user, token, isLoading: false });
         return true;
       }
-      set({ error: res.data.message || "Login failed", isLoading: false });
+      set({ error: data.message || "Login failed", isLoading: false });
       return false;
     } catch (error: any) {
       const message =
@@ -53,16 +53,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (name: string, email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.post("/users/register", { name, email, password });
-      if (res.data.success) {
-        const { newUser, token } = res.data.data;
+      const data = await userService.register({ name, email, password });
+      if (data.success) {
+        const { newUser, token } = data.data;
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(newUser));
         set({ user: newUser, token, isLoading: false });
         return true;
       }
       set({
-        error: res.data.message || "Registration failed",
+        error: data.message || "Registration failed",
         isLoading: false,
       });
       return false;
