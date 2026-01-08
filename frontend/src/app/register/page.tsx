@@ -1,8 +1,11 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import Link from "next/link";
+import { ArrowRight, UserPlus, Lock } from "lucide-react";
+import InteractiveGrid from "@/components/auth/InteractiveGrid";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -47,131 +50,131 @@ export default function RegisterPage() {
     const displayError = localError || error;
 
     return (
-        <main className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-6">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-700" />
-            </div>
+        <main className="min-h-screen bg-base-950 flex items-center justify-center p-6 relative overflow-hidden">
+            <InteractiveGrid />
 
-            <div className="relative z-10 w-full max-w-md">
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-white">
-                        OptiVision <span className="text-cyan-500">AI</span>
+            <div className="relative z-10 w-full max-w-[400px]">
+                {/* Header */}
+                <div className="text-center mb-8 space-y-2">
+                    <div className="flex items-center justify-center gap-2 mb-6">
+                        <div className="w-8 h-8 bg-foreground rounded-sm flex items-center justify-center">
+                            <div className="w-4 h-4 bg-base-950 rounded-sm" />
+                        </div>
+                    </div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                        Account Provisioning
                     </h1>
-                    <p className="text-slate-400 text-sm mt-2">Industrial Surveillance System</p>
+                    <p className="text-foreground-muted text-xs font-mono uppercase tracking-wider">
+                        Request System Credentialing
+                    </p>
                 </div>
 
                 {/* Card */}
-                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-8">
-                    <h2 className="text-xl font-semibold text-white mb-6">Create Account</h2>
-
+                <div className="bg-base-900 border border-base-800 p-8 shadow-none">
                     {displayError && (
-                        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex justify-between items-center">
-                            <span>{displayError}</span>
+                        <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-mono flex justify-between items-center">
+                            <span>ERROR: {displayError}</span>
                             <button
                                 onClick={() => {
                                     clearError();
                                     setLocalError("");
                                 }}
-                                className="text-red-400 hover:text-red-300"
+                                className="hover:text-white"
                             >
                                 ✕
                             </button>
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-mono text-foreground-muted uppercase tracking-widest">
                                 Full Name
                             </label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
-                                placeholder="John Doe"
+                                className="w-full bg-base-950 border border-base-800 px-4 py-2.5 text-sm text-foreground placeholder-base-700 font-mono focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors rounded-none"
+                                placeholder="OPERATOR NAME"
                                 required
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
-                                Email
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-mono text-foreground-muted uppercase tracking-widest">
+                                Email Address
                             </label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
-                                placeholder="you@example.com"
+                                className="w-full bg-base-950 border border-base-800 px-4 py-2.5 text-sm text-foreground placeholder-base-700 font-mono focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors rounded-none"
+                                placeholder="name@optivision.sys"
                                 required
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
-                                placeholder="••••••••"
-                                required
-                            />
-                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-mono text-foreground-muted uppercase tracking-widest">
+                                    Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-base-950 border border-base-800 px-4 py-2.5 text-sm text-foreground placeholder-base-700 font-mono focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors rounded-none"
+                                    placeholder="••••••"
+                                    required
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
-                                Confirm Password
-                            </label>
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
-                                placeholder="••••••••"
-                                required
-                            />
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-mono text-foreground-muted uppercase tracking-widest">
+                                    Confirm
+                                </label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="w-full bg-base-950 border border-base-800 px-4 py-2.5 text-sm text-foreground placeholder-base-700 font-mono focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors rounded-none"
+                                    placeholder="••••••"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-linear-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-semibold py-3 rounded-lg shadow-lg shadow-purple-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                            className="w-full bg-accent hover:bg-accent/90 text-white text-xs font-bold uppercase tracking-widest py-3 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded-none mt-2"
                         >
                             {isLoading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                    </svg>
-                                    Creating account...
-                                </span>
+                                <span className="animate-pulse">Processing...</span>
                             ) : (
-                                "Create Account"
+                                <>
+                                    Create Credentials <UserPlus size={14} />
+                                </>
                             )}
                         </button>
                     </form>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-slate-400 text-sm">
-                            Already have an account?{" "}
-                            <Link href="/login" className="text-cyan-500 hover:text-cyan-400 font-medium transition-colors">
-                                Sign in
+                    <div className="mt-8 pt-6 border-t border-base-800 text-center">
+                        <p className="text-foreground-muted text-xs">
+                            Existing personnel?{" "}
+                            <Link href="/login" className="text-accent hover:text-white transition-colors underline decoration-dotted underline-offset-4">
+                                Authenticate Here
                             </Link>
                         </p>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <p className="text-center text-slate-500 text-xs mt-6">
-                    By signing up, you agree to our Terms of Service
-                </p>
+                <div className="text-center mt-8 flex items-center justify-center gap-2 text-[10px] text-base-700 font-mono">
+                    <Lock size={10} />
+                    <span>ENCRYPTED_CHANNEL // 256-BIT_AES</span>
+                </div>
             </div>
         </main>
     );
