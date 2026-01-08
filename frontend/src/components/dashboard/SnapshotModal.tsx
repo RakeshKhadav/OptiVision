@@ -29,80 +29,69 @@ export default function SnapshotModal({ alert, onClose }: SnapshotModalProps) {
     if (!alert) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl max-w-3xl w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-                {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b border-slate-800 bg-slate-900">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${alert.severity === 'HIGH' ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber-500'}`}>
-                            <AlertTriangle className="w-5 h-5" />
-                        </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base-950/90 p-4">
+            <div className="bg-base-900 border border-base-800 rounded-none shadow-none max-w-4xl w-full overflow-hidden flex flex-col md:flex-row">
+
+                {/* Snapshot Image Area */}
+                <div className="md:w-2/3 bg-black flex items-center justify-center relative border-b md:border-b-0 md:border-r border-base-800 aspect-video md:aspect-auto">
+                    {alert.snapshot ? (
+                        <img
+                            src={alert.snapshot}
+                            alt="Incident Snapshot"
+                            className="max-w-full max-h-full object-contain"
+                        />
+                    ) : (
+                        <div className="text-foreground-muted text-sm font-mono">No image available</div>
+                    )}
+                    <div className="absolute top-3 left-3 bg-base-950/80 px-2 py-1 rounded-sm text-xs text-foreground font-mono border border-base-700">
+                        CAM-01
+                    </div>
+                </div>
+
+                {/* Details Panel */}
+                <div className="md:w-1/3 flex flex-col bg-base-900 text-foreground">
+                    {/* Header */}
+                    <div className="p-4 border-b border-base-800 flex justify-between items-start">
                         <div>
-                            <h3 className="font-bold text-white text-lg">{alert.type}</h3>
-                            <p className="text-xs text-slate-400">
+                            <h3 className="font-semibold text-sm leading-tight uppercase tracking-tight">{alert.message}</h3>
+                            <span className="text-[10px] text-foreground-muted font-mono mt-1 block">ID: {alert.id}</span>
+                        </div>
+                        <button onClick={onClose} className="text-foreground-muted hover:text-foreground transition-colors p-1 hover:bg-base-800 rounded-sm">
+                            <X size={16} />
+                        </button>
+                    </div>
+
+                    {/* Metadata List */}
+                    <div className="p-4 space-y-4 flex-1">
+                        <div className="space-y-1">
+                            <span className="text-[9px] uppercase font-bold text-foreground-muted tracking-widest">Severity</span>
+                            <div className={`flex items-center gap-2 text-xs font-medium ${alert.severity === 'HIGH' ? 'text-danger' : 'text-warning'}`}>
+                                <AlertTriangle size={14} />
+                                {alert.severity}
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <span className="text-[9px] uppercase font-bold text-foreground-muted tracking-widest">Detection Type</span>
+                            <div className="text-xs text-foreground font-mono bg-base-950 border border-base-800 inline-block px-2 py-1 rounded-sm">
+                                {alert.type}
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <span className="text-[9px] uppercase font-bold text-foreground-muted tracking-widest">Timestamp</span>
+                            <div className="text-xs text-foreground font-mono tabular-nums">
                                 {new Date(alert.createdAt).toLocaleString()}
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-400 hover:text-white transition-colors"
-                    >
-                        <X className="w-6 h-6" />
-                    </button>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                    {/* Snapshot Image */}
-                    <div className="relative aspect-video bg-black rounded-lg border border-slate-800 overflow-hidden mb-4 group">
-                        {alert.snapshot ? (
-                            <img
-                                src={alert.snapshot}
-                                alt="Incident Snapshot"
-                                className="w-full h-full object-contain"
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-slate-500 text-sm">
-                                No snapshot available
-                            </div>
-                        )}
-                        <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded">
-                            ID: #{alert.id}
-                        </div>
-                    </div>
-
-                    {/* Details */}
-                    <div className="bg-slate-800/50 rounded-lg p-4">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Incident Report</h4>
-                        <p className="text-sm text-slate-200 leading-relaxed">
-                            {alert.message}
-                        </p>
-                        <div className="mt-4 flex gap-4 text-xs text-slate-400">
-                            <div>
-                                <span className="block font-bold text-slate-500 uppercase">Severity</span>
-                                <span className={alert.severity === 'HIGH' ? 'text-red-400' : 'text-amber-400'}>
-                                    {alert.severity}
-                                </span>
-                            </div>
-                            <div>
-                                <span className="block font-bold text-slate-500 uppercase">Status</span>
-                                <span className="text-cyan-400">
-                                    PENDING REVIEW
-                                </span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-slate-800 bg-slate-900 flex justify-end gap-3">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 rounded text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-                    >
-                        Close
-                    </button>
+                    {/* Footer Actions */}
+                    <div className="p-4 border-t border-base-800 bg-base-950/30">
+                        <button className="w-full py-2 bg-foreground text-base-950 text-xs font-bold uppercase tracking-wide rounded-sm hover:bg-white transition-colors">
+                            Acknowledge Incident
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
