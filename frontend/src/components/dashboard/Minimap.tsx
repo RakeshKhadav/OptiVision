@@ -11,67 +11,68 @@ interface MinimapProps {
 }
 
 export default function Minimap({ detections, calibrationData }: MinimapProps) {
-    // Derive homography matrix from calibration data using useMemo
-    // This is more idiomatic than useEffect + useState for derived values
     const homographyMatrix = useMemo(() => {
         if (calibrationData && calibrationData.video && calibrationData.map) {
             return computeHomography(calibrationData.video, calibrationData.map);
         }
-        // Return null if no calibration - will use fallback linear mapping
         return null;
     }, [calibrationData]);
 
     return (
-        <div className="relative w-full aspect-4/3 bg-slate-900 rounded-lg overflow-hidden border border-slate-800">
-            {/* Floor Plan SVG Background */}
-            <img
-                src="/floorplan-base.svg"
-                alt="Floor Plan"
-                className="absolute inset-0 w-full h-full object-cover opacity-50"
-            />
+        <div className="relative w-full h-full">
+            {/* 
+              FLOOR PLAN SVG
+              Ideally this is a clean SVG. Using the image for now but applying filters 
+              to make it look like a CAD drawing.
+            */}
+            <div className="absolute inset-0 z-0 flex items-center justify-center p-4">
+                <img
+                    src="/floorplan-base.svg"
+                    alt="Floor Plan"
+                    className="max-w-full max-h-full opacity-40 grayscale invert brightness-150 contrast-125 select-none"
+                />
+            </div>
 
-            {/* Mapped Detections Layer */}
-            <div className="absolute inset-0 w-full h-full">
+            {/* Mapped Detections - Pure geometry keys */}
+            <div className="absolute inset-0 z-10 m-4">
                 {detections.map((det) => {
                     let mx = 0, my = 0;
-
                     if (homographyMatrix) {
-                        // Use Homography
                         const pt = applyHomography(homographyMatrix, det.x + det.width / 2, det.y + det.height);
-                        // Scale to % of container (assuming map coords are 0-800, 0-600)
                         mx = (pt.x / 800) * 100;
                         my = (pt.y / 600) * 100;
                     } else {
-                        // Fallback: Simple Linear Mapping (Video 1280x720 -> Map 100%x100%)
+                        // Crude Fallback for dev
                         mx = ((det.x + det.width / 2) / 1280) * 100;
                         my = ((det.y + det.height) / 720) * 100;
                     }
-
-                    // Clamp to view
                     mx = Math.max(0, Math.min(100, mx));
                     my = Math.max(0, Math.min(100, my));
+
+                    const isMachinery = det.label === 'Forklift';
 
                     return (
                         <div
                             key={det.workerId || Math.random()}
-                            className="absolute w-3 h-3 rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                            style={{
-                                left: `${mx}%`,
-                                top: `${my}%`,
-                                backgroundColor: det.label === 'Forklift' ? '#ffaa00' : '#00f3ff'
-                            }}
+                            className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-linear"
+                            style={{ left: `${mx}%`, top: `${my}%` }}
                         >
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] bg-black/80 px-1 rounded text-white whitespace-nowrap">
-                                {det.workerId || det.label}
-                            </div>
+                            {/* Pulse effect for visibility */}
+                            <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${isMachinery ? 'bg-warning' : 'bg-accent'}`} />
+
+                            {/* Core Dot */}
+                            <div className={`
+                                shadow-[0_0_0_1px_rgba(0,0,0,1)] 
+                                ${isMachinery ? 'w-2 h-2 bg-warning rounded-sm' : 'w-1.5 h-1.5 bg-white rounded-full'}
+                            `} />
                         </div>
                     );
                 })}
             </div>
 
-            <div className="absolute bottom-2 right-2 text-[10px] text-slate-500 bg-black/50 px-2 py-1 rounded">
-                Digital Twin v1.0
-            </div>
+            {/* Scale Marker (Decorative Engineering Touch) */}
+            <div className="absolute bottom-2 right-2 border-b border-r border-foreground-muted/30 w-4 h-4" />
+            <div className="absolute top-2 left-2 border-t border-l border-foreground-muted/30 w-4 h-4" />
         </div>
     );
 }
