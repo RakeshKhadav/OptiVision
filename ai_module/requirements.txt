@@ -1,0 +1,7 @@
+ultralytics
+opencv-python
+python-socketio[client]
+requests
+python-dotenv
+numpy
+shapely
