@@ -121,7 +121,15 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-const getCurrentUser = asyncHandler(async (req: any, res: Response) => {
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
+const getCurrentUser = asyncHandler(async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user;
     if (!user) {
