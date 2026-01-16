@@ -8,6 +8,7 @@ import sys
 from ultralytics import YOLO
 import requests
 from dotenv import load_dotenv
+from utils.api_manager import APIManager
 
 # Load environment variables
 load_dotenv()
@@ -24,8 +25,12 @@ except ValueError:
 sio = socketio.Client()
 
 # State Management
-worker_states = {} # { track_id: { last_pos: (x,y), last_active_time: timestamp } }
+worker_states = {} # { track_id: { last_pos: (x,y), last_active_time: timestamp, is_idle: bool } }
 zones = [] # List of polygons from backend: [{id, coordinates: [[x,y]...], type}]
+alert_cooldowns = {} # { track_id: timestamp }
+ALERT_COOLDOWN_SECONDS = 10
+
+api_manager = APIManager()
 
 # Idle Constants
 IDLE_THRESHOLD_PIXELS = 20 # Minimum movement to be considered "active"
@@ -43,6 +48,38 @@ except Exception as e:
     print(f"⚠️ Failed to load yolo11n.pt, falling back to yolov8n.pt: {e}")
     model = YOLO('yolov8n.pt')
 
+# --- Zone Parsing Helper ---
+def parse_zones(data):
+    parsed_zones = []
+    print(f"🔄 Processing {len(data)} zones...")
+    for z in data:
+        try:
+            # Assuming coordinates come as stringified JSON or direct array
+            coords = z.get('coordinates')
+            if isinstance(coords, str):
+                import json
+                coords = json.loads(coords)
+            
+            # Ensure coords is a numpy array of points (int32) for OpenCV
+            if coords:
+                pts = np.array(coords, np.int32)
+                pts = pts.reshape((-1, 1, 2))
+                parsed_zones.append({
+                    "id": z.get('id'),
+                    "type": z.get('type', 'DANGER'),
+                    "poly": pts
+                })
+        except Exception as e:
+            print(f"⚠️ Failed to parse zone {z.get('id')}: {e}")
+    return parsed_zones
+
+# --- Initial Zone Fetch ---
+try:
+    initial_zones = api_manager.fetch_zones()
+    zones = parse_zones(initial_zones)
+except Exception as e:
+    print(f"⚠️ Initial zone fetch failed: {e}")
+
 # --- Socket Events ---
 @sio.event
 def connect():
@@ -56,34 +93,9 @@ def disconnect():
 def on_zone_update(data):
     """
     Receive updated zones from backend.
-    Expected data structure: Array of objects with 'coordinates' geometry.
     """
     global zones
-    print(f"🔄 Zones Updated: {len(data)} zones received")
-    
-    # Parse zones
-    new_zones = []
-    for z in data:
-        try:
-            # Assuming coordinates come as stringified JSON or direct array
-            coords = z.get('coordinates')
-            if isinstance(coords, str):
-                import json
-                coords = json.loads(coords)
-            
-            # Ensure coords is a numpy array of points (int32) for OpenCV
-            if coords:
-                pts = np.array(coords, np.int32)
-                pts = pts.reshape((-1, 1, 2))
-                new_zones.append({
-                    "id": z.get('id'),
-                    "type": z.get('type', 'DANGER'),
-                    "poly": pts
-                })
-        except Exception as e:
-            print(f"⚠️ Failed to parse zone {z.get('id')}: {e}")
-            
-    zones = new_zones
+    zones = parse_zones(data)
 
 @sio.on('toggle_settings')
 def on_toggle_settings(data):
@@ -204,6 +216,33 @@ def main():
                     
                     # --- ZONE LOGIC ---
                     zone_type = check_zone_intrusion(center_x, bottom_y)
+
+                    # --- ALERT LOGIC ---
+                    if zone_type == 'DANGER':
+                        current_time = time.time()
+                        last_alert = alert_cooldowns.get(track_id, 0)
+                        
+                        if current_time - last_alert > ALERT_COOLDOWN_SECONDS:
+                            print(f"🚨 TRIGGERING ALERT: Worker {track_id} in DANGER ZONE")
+                            # Send snapshot? (Optional optimization: catch frame)
+                            # For now just send message
+                            api_manager.send_alert(
+                                type="ZONE_INTRUSION",
+                                severity="HIGH",
+                                message=f"Worker {track_id} entered a DANGER zone.",
+                                camera_id=1
+                            )
+                            alert_cooldowns[track_id] = current_time
+                    
+                    # --- IDLE ACTIVITY LOGIC ---
+                    # Check if just became idle
+                    if is_idle:
+                        # Logic to send activity log can be complex (start/end). 
+                        # For now, let's log an "IDLE_DETECTED" event just once per idle session?
+                        # Or rely on the `update_worker_state` to track cumulative idle time.
+                        # For simplicity in this fix, we will separate Activity Logging to refined future iterations
+                        # and focus on the Critical Alert persistence.
+                        pass
                     
                     # --- METADATA ---
                     detection_metadata.append({
