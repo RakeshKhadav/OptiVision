@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 interface UserPayload {
   id: string;
@@ -6,9 +6,11 @@ interface UserPayload {
   role: string;
 }
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "your-secret-key-change-in-production";
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not set. Application cannot start.');
+}
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export const generateToken = (user: UserPayload): string => {
   const payload = {
@@ -18,7 +20,7 @@ export const generateToken = (user: UserPayload): string => {
   };
 
   const options: SignOptions = {
-    expiresIn: JWT_EXPIRES_IN as SignOptions["expiresIn"],
+    expiresIn: JWT_EXPIRES_IN as SignOptions['expiresIn'],
   };
 
   return jwt.sign(payload, JWT_SECRET, options);
@@ -29,10 +31,10 @@ export const verifyToken = (token: string): UserPayload => {
     const decoded = jwt.verify(token, JWT_SECRET) as unknown as UserPayload;
     // Optionally, add a runtime check:
     if (!decoded || !decoded.id || !decoded.email || !decoded.role) {
-      throw new Error("Invalid token payload");
+      throw new Error('Invalid token payload');
     }
     return decoded;
   } catch (error) {
-    throw new Error("Invalid or expired token");
+    throw new Error('Invalid or expired token');
   }
 };

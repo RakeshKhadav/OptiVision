@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.js';
+import { authenticateApiKeyOrToken } from '../middleware/apiKeyAuth.js';
 import {
   createActivity,
   getAllActivities,
@@ -8,7 +9,7 @@ import {
 
 const router = Router();
 
-router.post('/', authenticate, createActivity);
+router.post('/', authenticateApiKeyOrToken, createActivity);
 router.get('/', authenticate, getAllActivities);
 router.get('/stats', authenticate, getStatsOfActivities);
 
