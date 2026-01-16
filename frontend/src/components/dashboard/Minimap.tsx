@@ -1,13 +1,11 @@
 "use client";
 import { useMemo } from "react";
 import { applyHomography, computeHomography } from "@/lib/homography";
+import { CalibrationData, Detection } from "@/types";
 
 interface MinimapProps {
-    detections: any[];
-    calibrationData?: {
-        video: number[][];
-        map: number[][];
-    };
+    detections: Detection[]; // Use strict type or any[] if Detection is too strict
+    calibrationData?: CalibrationData;
 }
 
 export default function Minimap({ detections, calibrationData }: MinimapProps) {

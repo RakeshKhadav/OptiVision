@@ -16,27 +16,22 @@ export default function ProductivityChart({ initialData }: ProductivityChartProp
     // We are repurposing this component to be a "Live Metrics Engine"
     // Instead of a chart, we show raw, tabular data with deterministic updates.
 
-    const [metrics, setMetrics] = useState<Metric[]>([
+    // We are repurposing this component to be a "Live Metrics Engine"
+    // Instead of a chart, we show raw, tabular data with deterministic updates.
+
+    // Transform initialData (which is now strictly chartData {name, value}) into Metrics
+    // If no data, use placeholders
+    const metrics: Metric[] = initialData.length > 0 ? initialData.map(d => ({
+        label: d.name,
+        value: d.value,
+        unit: 's', // Assuming seconds/duration from backend
+        trend: 0
+    })) : [
         { label: "Efficiency", value: 92.4, unit: "%", trend: 0.1 },
         { label: "Cycle Time", value: 145, unit: "ms", trend: -12 },
         { label: "Throughput", value: 840, unit: "/hr", trend: 5 },
         { label: "Idle State", value: 4.2, unit: "%", trend: -0.5 },
-    ]);
-
-    // Simulate deterministic "industrial" updates
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setMetrics(prev => prev.map(m => {
-                const change = (Math.random() - 0.5) * (m.value * 0.01);
-                return {
-                    ...m,
-                    value: Number((m.value + change).toFixed(1))
-                };
-            }));
-        }, 2000); // Slow, readable updates (2s)
-
-        return () => clearInterval(interval);
-    }, []);
+    ];
 
     return (
         <div className="w-full flex flex-col gap-1">

@@ -2,13 +2,7 @@
 import { useEffect } from "react";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { Camera as CameraIcon, ChevronDown } from "lucide-react";
-
-interface Camera {
-    id: number;
-    name: string;
-    status: string;
-    calibrationData: any;
-}
+import { Camera } from "@/types";
 
 interface CameraSelectorProps {
     initialCameras: Camera[];
