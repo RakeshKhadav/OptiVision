@@ -5,8 +5,10 @@ import { useSocket } from "@/hooks/useSocket";
 import { useTrails } from "@/hooks/useTrails";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { cameraService, Camera } from "@/services/cameraService";
+import { cameraService } from "@/services/cameraService";
+import { Camera } from "@/types";
 import { activityService } from "@/services/activityService";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import LiveFeed from "@/components/dashboard/LiveFeed";
 import Minimap from "@/components/dashboard/Minimap";
 import ProductivityChart from "@/components/dashboard/ProductivityChart"; // Will replace later
@@ -24,32 +26,8 @@ export default function Dashboard() {
     const trails = useTrails(detections);
     const [selectedAlert, setSelectedAlert] = useState<any | null>(null);
 
-    // Initial data
-    const [initialCameras, setInitialCameras] = useState<Camera[]>([]);
-    const [initialChartData, setInitialChartData] = useState<any[]>([]);
-
-    useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                const camerasData = await cameraService.getCameras();
-                if (camerasData.success) {
-                    setInitialCameras(camerasData.data);
-                    useDashboardStore.getState().setCameras(camerasData.data);
-                }
-                const statsData = await activityService.getActivityStats();
-                if (statsData.success && statsData.data.activityStats) {
-                    const chartData = statsData.data.activityStats.map((stat: any) => ({
-                        name: stat.action,
-                        value: stat._sum.duration || 0
-                    }));
-                    setInitialChartData(chartData);
-                }
-            } catch (error) {
-                console.error("Failed to fetch initial data:", error);
-            }
-        };
-        fetchInitialData();
-    }, []);
+    // Initial data handled by custom hook [REFACTOR]
+    const { initialCameras, initialChartData } = useDashboardData();
 
     const activeCamera = useDashboardStore((state) =>
         state.cameras.find(c => c.id === state.activeCameraId) || initialCameras.find(c => c.id === state.activeCameraId)

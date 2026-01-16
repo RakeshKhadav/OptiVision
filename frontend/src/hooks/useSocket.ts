@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { socket } from "@/lib/socket";
 import { useDashboardStore } from "@/store/useDashboardStore";
+import { Detection, Alert } from "@/types";
+
+interface StreamPayload {
+  image: string;
+  boxes: Detection[];
+}
 
 export const useSocket = (activeCameraId: number | null) => {
   const [isConnected, setIsConnected] = useState(false);
   const [frame, setFrame] = useState<string>(""); // Base64 image
-  const [detections, setDetections] = useState<any[]>([]);
+  const [detections, setDetections] = useState<Detection[]>([]);
 
   const addAlert = useDashboardStore((state) => state.addAlert);
   const isPrivacyMode = useDashboardStore((state) => state.isPrivacyMode);
@@ -16,13 +22,13 @@ export const useSocket = (activeCameraId: number | null) => {
     socket.on("connect", () => setIsConnected(true));
 
     // 1. Hot Path: Real-time AI feed
-    socket.on("stream_feed", (data: { image: string; boxes: any[] }) => {
+    socket.on("stream_feed", (data: StreamPayload) => {
       setFrame(data.image);
       setDetections(data.boxes);
     });
 
     // 2. Cold Path: New Incident Alerts
-    socket.on("alert", (data: any) => {
+    socket.on("alert", (data: Alert) => {
       addAlert(data);
     });
 

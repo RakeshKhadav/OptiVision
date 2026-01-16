@@ -2,14 +2,7 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Play } from "lucide-react";
 
-interface Alert {
-    id: number;
-    type: string;
-    severity: string;
-    message: string;
-    createdAt: string;
-    [key: string]: any;
-}
+import { Alert } from "@/types";
 
 interface HorizontalTimelineProps {
     alerts: Alert[];

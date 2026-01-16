@@ -2,14 +2,8 @@
 import { useEffect } from "react";
 import { X, AlertTriangle } from "lucide-react";
 
-interface Alert {
-    id: number;
-    type: string;
-    severity: "HIGH" | "MEDIUM" | "NORMAL";
-    message: string;
-    snapshot: string;
-    createdAt: string;
-}
+import { Alert } from "@/types";
+import { useDashboardStore } from "@/store/useDashboardStore";
 
 interface SnapshotModalProps {
     alert: Alert | null;
@@ -17,6 +11,8 @@ interface SnapshotModalProps {
 }
 
 export default function SnapshotModal({ alert, onClose }: SnapshotModalProps) {
+    const resolveAlert = useDashboardStore((state) => state.resolveAlert);
+
     // Close on Escape key
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
@@ -27,6 +23,11 @@ export default function SnapshotModal({ alert, onClose }: SnapshotModalProps) {
     }, [onClose]);
 
     if (!alert) return null;
+
+    const handleResolve = async () => {
+        await resolveAlert(alert.id);
+        onClose();
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-base-950/90 p-4">
@@ -84,13 +85,34 @@ export default function SnapshotModal({ alert, onClose }: SnapshotModalProps) {
                                 {new Date(alert.createdAt).toLocaleString()}
                             </div>
                         </div>
+
+                        {/* Status Indicator */}
+                        <div className="space-y-1">
+                            <span className="text-[9px] uppercase font-bold text-foreground-muted tracking-widest">Status</span>
+                            <div className={`text-xs font-mono font-bold ${alert.isResolved ? 'text-success' : 'text-danger'}`}>
+                                {alert.isResolved ? 'RESOLVED' : 'ACTIVE'}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Footer Actions */}
                     <div className="p-4 border-t border-base-800 bg-base-950/30">
-                        <button className="w-full py-2 bg-foreground text-base-950 text-xs font-bold uppercase tracking-wide rounded-sm hover:bg-white transition-colors">
-                            Acknowledge Incident
-                        </button>
+                        {!alert.isResolved ? (
+                            <button
+                                onClick={handleResolve}
+                                className="w-full py-2 bg-foreground text-base-950 text-xs font-bold uppercase tracking-wide rounded-sm hover:bg-white transition-colors"
+                            >
+                                Acknowledge & Resolve
+                            </button>
+                        ) : (
+                            <button
+                                disabled
+                                className="w-full py-2 bg-base-800 text-foreground-muted text-xs font-bold uppercase tracking-wide rounded-sm cursor-not-allowed"
+                            >
+                                Incident Resolved
+                            </button>
+                        )}
+
                     </div>
                 </div>
             </div>

@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
-
-interface Detection {
-  workerId: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  label: string;
-  confidence: number;
-}
+import { Detection } from "@/types";
 
 interface TrailPoint {
   x: number;
@@ -36,13 +27,13 @@ export const useTrails = (detections: Detection[]) => {
         const currentTrail = newTrails[det.workerId] || [];
         // Keep only the last 20 points
         const updatedTrail = [...currentTrail, newPoint].slice(-20);
-        
+
         newTrails[det.workerId] = updatedTrail;
       });
 
-      // Cleanup: Optionally remove IDs that haven't been seen in a while 
+      // Cleanup: Optionally remove IDs that haven't been seen in a while
       // (This can be more complex, but for now we'll just keep them)
-      
+
       return newTrails;
     });
   }, [detections]);

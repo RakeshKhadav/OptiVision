@@ -1,16 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import { MousePointer2, X, ShieldAlert, Crosshair } from "lucide-react";
-
-interface Detection {
-    workerId: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    label: string;
-    confidence: number;
-}
+import { Detection } from "@/types";
 
 interface LiveFeedProps {
     frame: string;
