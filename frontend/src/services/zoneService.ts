@@ -11,16 +11,16 @@ export interface Zone {
 export const zoneService = {
   getZones: async () => {
     const response = await api.get("/zones");
-    return response.data;
+    return response.data.data;
   },
 
   createZone: async (zoneData: any) => {
     const response = await api.post("/zones", zoneData);
-    return response.data;
+    return response.data.data;
   },
 
   deleteZone: async (id: number) => {
     const response = await api.delete(`/zones/${id}`);
-    return response.data;
+    return response.data.data;
   },
 };

@@ -15,11 +15,11 @@ export interface StatsResponse {
 export const activityService = {
   getActivityStats: async () => {
     const response = await api.get("/activity/stats");
-    return response.data;
+    return response.data.data;
   },
 
   getActivityLogs: async () => {
     const response = await api.get("/activity");
-    return response.data;
+    return response.data.data;
   },
 };
