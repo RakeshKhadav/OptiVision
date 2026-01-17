@@ -21,6 +21,15 @@ try:
 except ValueError:
     pass # Keep as string for file path
 
+    pass # Keep as string for file path
+
+AI_DEVICE = os.getenv('AI_DEVICE', 'cpu')
+import torch
+if torch.cuda.is_available() and AI_DEVICE != 'cpu':
+    print(f"🚀 Acceleration Enabled: {torch.cuda.get_device_name(0)}")
+else:
+    print(f"⚠️ GPU not detected or not requested. Device: {AI_DEVICE}")
+
 # Initialize Socket.IO Client
 sio = socketio.Client()
 
@@ -58,7 +67,15 @@ def parse_zones(data):
             coords = z.get('coordinates')
             if isinstance(coords, str):
                 import json
-                coords = json.loads(coords)
+                import json
+                try:
+                    coords = json.loads(coords)
+                except json.JSONDecodeError:
+                    # Fallback for "0 0 0" or space separated format
+                    # If it's just "0 0 0", it's likely invalid for a polygon.
+                    # We'll try to split and see if we have pairs, but "0 0 0" is 3 items -> invalid.
+                    print(f"⚠️ JSON parse failed for zone {z.get('id')}. Raw: '{coords}'")
+                    coords = [] # Treat as empty/invalid to avoid crash
             
             # Ensure coords is a numpy array of points (int32) for OpenCV
             if coords:
@@ -71,6 +88,7 @@ def parse_zones(data):
                 })
         except Exception as e:
             print(f"⚠️ Failed to parse zone {z.get('id')}: {e}")
+            print(f"Propblematic Coords: {z.get('coordinates')} (Type: {type(z.get('coordinates'))})")
     return parsed_zones
 
 # --- Initial Zone Fetch ---
@@ -186,7 +204,7 @@ def main():
             # Run YOLO with Tracking
             # classes=0 (Person), classes=[0, ...] for more.
             # For Forklift, we might need a custom model or map 'truck'/'car' (classes 2, 7) to 'Forklift'
-            results = model.track(frame, persist=True, verbose=False, classes=[0, 2, 7]) 
+            results = model.track(frame, persist=True, verbose=False, classes=[0, 2, 7], device=AI_DEVICE) 
 
             detection_metadata = []
             
@@ -289,7 +307,7 @@ def main():
 
             # Emit to Backend
             if sio.connected:
-                sio.emit('stream_feed', {
+                sio.emit('stream_data', {
                     'image': jpg_as_text,
                     'boxes': detection_metadata
                 })
