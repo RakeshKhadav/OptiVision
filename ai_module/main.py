@@ -21,8 +21,6 @@ try:
 except ValueError:
     pass # Keep as string for file path
 
-    pass # Keep as string for file path
-
 AI_DEVICE = os.getenv('AI_DEVICE', 'cpu')
 import torch
 if torch.cuda.is_available() and AI_DEVICE != 'cpu':
@@ -66,7 +64,6 @@ def parse_zones(data):
             # Assuming coordinates come as stringified JSON or direct array
             coords = z.get('coordinates')
             if isinstance(coords, str):
-                import json
                 import json
                 try:
                     coords = json.loads(coords)
@@ -252,16 +249,6 @@ def main():
                             )
                             alert_cooldowns[track_id] = current_time
                     
-                    # --- IDLE ACTIVITY LOGIC ---
-                    # Check if just became idle
-                    if is_idle:
-                        # Logic to send activity log can be complex (start/end). 
-                        # For now, let's log an "IDLE_DETECTED" event just once per idle session?
-                        # Or rely on the `update_worker_state` to track cumulative idle time.
-                        # For simplicity in this fix, we will separate Activity Logging to refined future iterations
-                        # and focus on the Critical Alert persistence.
-                        pass
-                    
                     # --- METADATA ---
                     detection_metadata.append({
                         "id": track_id,
@@ -292,6 +279,29 @@ def main():
                     
                     cv2.putText(annotated_frame, text, (int(x1), int(y1)-5), 
                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    
+            # --- ACTIVITY LOGGING (HEARTBEAT) ---
+            current_time = time.time()
+            if 'last_activity_log_time' not in locals():
+                last_activity_log_time = current_time
+
+            if current_time - last_activity_log_time > 5: # Log every 5 seconds
+                print(f"⏱️ Syncing Activity Logs for {len(worker_states)} workers...")
+                for t_id, state in worker_states.items():
+                    # We assume if they are in worker_states, they are currently tracked or recently tracked.
+                    # Ideally we should filter by recent visibility, but for now log all valid states.
+                    # Simple heuristic: Only log if we saw them recently (e.g. < 5s ago)
+                    # For this MVP, we log whatever state is current.
+                    
+                    action = "IDLE" if state['is_idle'] else "WORKING"
+                    # Send 5 seconds worth of duration
+                    api_manager.send_activity(
+                        worker_id=t_id,
+                        action=action,
+                        duration=5,
+                        camera_id=1
+                    )
+                last_activity_log_time = current_time
 
             # --- PRIVACY MODE ---
             if privacy_mode:
