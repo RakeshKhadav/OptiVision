@@ -18,9 +18,10 @@ export default function HorizontalTimeline({ alerts, onAlertClick }: HorizontalT
     const [hoverTime, setHoverTime] = useState<number | null>(null);
     const [cursorX, setCursorX] = useState<number>(0);
 
-    // Sort alerts by time
+    // Sort alerts by time (defensive: ensure alerts is iterable)
     const sortedAlerts = useMemo(() => {
-        return [...alerts].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        const safeAlerts = alerts ?? [];
+        return [...safeAlerts].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }, [alerts]);
 
     // Calculate time range
