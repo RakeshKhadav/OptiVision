@@ -52,6 +52,9 @@ export interface Detection {
   confidence: number;
   track_id: number;
   workerId?: string; // Optional identifier if matched
+  minimapX?: number; // 0-100%
+  minimapY?: number; // 0-100%
+  ppeViolation?: string | null; // e.g. "NO_HELMET"
 }
 
 export interface ActivityLog {

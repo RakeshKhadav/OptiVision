@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import Link from "next/link";
 import { ArrowRight, Lock } from "lucide-react";
-import InteractiveGrid from "@/components/auth/InteractiveGrid";
+import BackgroundElements from "@/components/landing/BackgroundElements";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -33,93 +34,150 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="min-h-screen bg-base-950 flex items-center justify-center p-6 relative overflow-hidden">
-            <InteractiveGrid />
+        <main className="min-h-screen bg-base-950 flex items-center justify-center p-6 relative overflow-hidden selection:bg-accent selection:text-black">
+            <BackgroundElements />
+            {/* Darker overlay for better contrast */}
+            <div className="absolute inset-0 bg-base-950/20 backdrop-blur-[2px]" />
 
-            <div className="relative z-10 w-full max-w-[400px]">
-                {/* Header */}
-                <div className="text-center mb-8 space-y-2">
-                    <div className="flex items-center justify-center gap-2 mb-6">
-                        <div className="w-8 h-8 bg-foreground rounded-sm flex items-center justify-center">
-                            <div className="w-4 h-4 bg-base-950 rounded-sm" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                        System Access
-                    </h1>
-                    <p className="text-foreground-muted text-xs font-mono uppercase tracking-wider">
-                        Authorized Personnel Only
-                    </p>
-                </div>
+            <div className="relative z-10 w-full max-w-[480px]">
 
-                {/* Card */}
-                <div className="bg-base-900 border border-base-800 p-8 shadow-none">
-                    {error && (
-                        <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-mono flex justify-between items-center">
-                            <span>ERROR: {error}</span>
-                            <button onClick={clearError} className="hover:text-white">✕</button>
-                        </div>
-                    )}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="relative w-full p-8 rounded-3xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-2xl group"
+                >
+                    {/* Inner Glass Highlight */}
+                    <div className="absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent opacity-50 pointer-events-none" />
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-mono text-foreground-muted uppercase tracking-widest">
-                                Operator ID (Email)
-                            </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-base-950 border border-base-800 px-4 py-2.5 text-sm text-foreground placeholder-base-700 font-mono focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors rounded-none"
-                                placeholder="operator@optivision.sys"
-                                required
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-mono text-foreground-muted uppercase tracking-widest">
-                                Access Key
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-base-950 border border-base-800 px-4 py-2.5 text-sm text-foreground placeholder-base-700 font-mono focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors rounded-none"
-                                placeholder="••••••••••••"
-                                required
-                            />
+                    <div className="relative z-10">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <motion.div
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.2, duration: 0.5 }}
+                                className="mx-auto w-16 h-16 bg-accent/10 rounded-xl flex items-center justify-center mb-6 border border-accent/20 shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                            >
+                                <img src="/logo.png" alt="OptiVision Logo" className="w-10 h-10 object-contain" />
+                            </motion.div>
+                            <motion.h1
+                                initial={{ y: 10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="text-3xl font-bold text-white mb-2"
+                            >
+                                Welcome Back
+                            </motion.h1>
+                            <motion.p
+                                initial={{ y: 10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.4 }}
+                                className="text-white/50 text-sm"
+                            >
+                                Enter your credentials to access the system
+                            </motion.p>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full bg-accent hover:bg-accent/90 text-white text-xs font-bold uppercase tracking-widest py-3 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded-none"
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm flex justify-between items-center backdrop-blur-md"
+                            >
+                                <span>{error}</span>
+                                <button onClick={clearError} className="hover:text-white transition-colors">✕</button>
+                            </motion.div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <motion.div
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="space-y-2"
+                            >
+                                <label className="text-sm font-medium text-white/70 ml-1">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-white/20 rounded-xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all hover:bg-white/10"
+                                    placeholder="name@example.com"
+                                    required
+                                />
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: 0.6 }}
+                                className="space-y-2"
+                            >
+                                <label className="text-sm font-medium text-white/70 ml-1">
+                                    Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-white/20 rounded-xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all hover:bg-white/10"
+                                    placeholder="••••••••••••"
+                                    required
+                                />
+                            </motion.div>
+
+                            <motion.button
+                                type="submit"
+                                disabled={isLoading}
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.7 }}
+                                whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(245,158,11,0.4)" }}
+                                whileTap={{ scale: 0.98 }}
+                                className="w-full bg-accent hover:bg-amber-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(245,158,11,0.2)] disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                            >
+                                {isLoading ? (
+                                    <span className="animate-pulse">Authenticating...</span>
+                                ) : (
+                                    <>
+                                        <span className="relative z-10 flex items-center gap-2">
+                                            Sign In <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        </span>
+                                        {/* Button Shimmer */}
+                                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+                                    </>
+                                )}
+                            </motion.button>
+                        </form>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8 }}
+                            className="mt-8 pt-6 border-t border-white/10 text-center"
                         >
-                            {isLoading ? (
-                                <span className="animate-pulse">Authenticating...</span>
-                            ) : (
-                                <>
-                                    Initialize Session <ArrowRight size={14} />
-                                </>
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="mt-8 pt-6 border-t border-base-800 text-center">
-                        <p className="text-foreground-muted text-xs">
-                            New terminal?{" "}
-                            <Link href="/register" className="text-accent hover:text-white transition-colors underline decoration-dotted underline-offset-4">
-                                Request Access Provisions
-                            </Link>
-                        </p>
+                            <p className="text-white/40 text-sm">
+                                Don't have an account?{" "}
+                                <Link href="/register" className="text-accent hover:text-amber-400 transition-colors font-medium relative group-hover:underline">
+                                    Create Account
+                                </Link>
+                            </p>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
 
-                {/* Footer */}
-                <div className="text-center mt-8 flex items-center justify-center gap-2 text-[10px] text-base-700 font-mono">
-                    <Lock size={10} />
-                    <span>SECURE_CONNECTION_ESTABLISHED // TSL_1.3</span>
-                </div>
+                {/* Footer simple copyright */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.9 }}
+                    className="text-center mt-8 text-white/20 text-xs"
+                >
+                    &copy; {new Date().getFullYear()} OptiVision AI. Secure System.
+                </motion.div>
             </div>
         </main>
     );

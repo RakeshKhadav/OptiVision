@@ -14,7 +14,6 @@ api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
-      console.log("Interceptor: Token found?", !!token);
       if (token) {
         // Use set for better compatibility with different Axios versions
         if (config.headers.set) {
@@ -31,6 +30,7 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 // Add a response interceptor
 api.interceptors.response.use(
   (response) => response,

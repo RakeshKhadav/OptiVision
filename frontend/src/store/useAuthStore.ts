@@ -21,6 +21,7 @@ interface AuthState {
   logout: () => void;
   clearError: () => void;
   hydrateFromStorage: () => void;
+  verifySession: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -97,6 +98,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           localStorage.removeItem("user");
         }
       }
+    }
+  },
+
+  verifySession: async () => {
+    const { token, logout } = get();
+    if (!token) return false;
+
+    try {
+      const data = await userService.getCurrentUser();
+      if (data.success && data.data) {
+        set({ user: data.data });
+        return true;
+      }
+      // Token exists but server rejected it
+      logout();
+      return false;
+    } catch {
+      // Network error or 401 - logout
+      logout();
+      return false;
     }
   },
 }));

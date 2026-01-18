@@ -1,209 +1,224 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSocket } from "@/hooks/useSocket";
-import { useTrails } from "@/hooks/useTrails";
-import { useDashboardStore } from "@/store/useDashboardStore";
+
+import { useEffect, useState, useMemo } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
-import { cameraService } from "@/services/cameraService";
-import { Camera } from "@/types";
-import { activityService } from "@/services/activityService";
-import { useDashboardData } from "@/hooks/useDashboardData";
+import { useDashboardStore } from "@/store/useDashboardStore";
+import { useRouter } from "next/navigation";
+import { Sidebar } from "@/components/ui/Sidebar";
+import { GlassButton } from "@/components/ui/GlassButton";
+import { LogOut, Radar, ShieldCheck, Activity } from "lucide-react";
 import LiveFeed from "@/components/dashboard/LiveFeed";
-import Minimap from "@/components/dashboard/Minimap";
-import ProductivityChart from "@/components/dashboard/ProductivityChart"; // Will replace later
-import SnapshotModal from "@/components/dashboard/SnapshotModal";
-import CameraSelector from "@/components/dashboard/CameraSelector";
 import HorizontalTimeline from "@/components/dashboard/HorizontalTimeline";
-import SystemLog from "@/components/dashboard/SystemLog";
-import { Eye, EyeOff, Activity, Shield, LogOut, Settings, Cpu } from "lucide-react";
+import SnapshotModal from "@/components/dashboard/SnapshotModal";
+import { socket } from "@/lib/socket";
+import ProductivityChart from "@/components/dashboard/ProductivityChart";
+import { Detection, Alert } from "@/types";
+import BackgroundElements from "@/components/landing/BackgroundElements";
+import Minimap from "@/components/dashboard/Minimap";
+import RecentActivity from "@/components/dashboard/RecentActivity";
+import SafetyGauge from "@/components/dashboard/stats/SafetyGauge";
+import ComplianceTracker from "@/components/dashboard/stats/ComplianceTracker";
+import { usePPEStats } from "@/hooks/usePPEStats";
 
 export default function Dashboard() {
     const router = useRouter();
-    const { user, logout } = useAuthStore();
-    const { activeCameraId, showTrails, toggleTrails, isPrivacyMode, setPrivacyMode, alerts } = useDashboardStore();
-    const { isConnected, frame, detections } = useSocket(activeCameraId);
-    const trails = useTrails(detections);
-    const [selectedAlert, setSelectedAlert] = useState<any | null>(null);
+    const { logout } = useAuthStore();
 
-    // Initial data handled by custom hook [REFACTOR]
-    const { initialCameras, initialChartData } = useDashboardData();
+    // Essential hooks for Navbar state
+    const { showTrails, isPrivacyMode, alerts, addAlert, fetchAlertHistory } = useDashboardStore();
 
-    const activeCamera = useDashboardStore((state) =>
-        state.cameras.find(c => c.id === state.activeCameraId) || initialCameras.find(c => c.id === state.activeCameraId)
-    );
+    // Local state for live feed
+    const [frame, setFrame] = useState<string>("");
+    const [detections, setDetections] = useState<Detection[]>([]);
+    const [isConnected, setIsConnected] = useState(false);
+
+    // State for incident timeline modal
+    const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+
+    useEffect(() => {
+        // Connect socket
+        if (!socket.connected) {
+            socket.connect();
+        }
+
+        function onConnect() {
+            setIsConnected(true);
+            console.log("Socket connected");
+        }
+
+        function onDisconnect() {
+            setIsConnected(false);
+            console.log("Socket disconnected");
+        }
+
+        function onStreamFeed(data: { image: string, boxes: any[] }) {
+            setFrame(data.image);
+            setDetections(data.boxes || []);
+        }
+
+        // Real-time alert listener
+        function onAlert(data: Alert) {
+            addAlert(data);
+        }
+
+        socket.on("connect", onConnect);
+        socket.on("disconnect", onDisconnect);
+        socket.on("stream_feed", onStreamFeed);
+        socket.on("alert", onAlert);
+
+        return () => {
+            socket.off("connect", onConnect);
+            socket.off("disconnect", onDisconnect);
+            socket.off("stream_feed", onStreamFeed);
+            socket.off("alert", onAlert);
+            socket.disconnect();
+        };
+    }, [addAlert]);
+
+    // Fetch historical alerts on mount
+    useEffect(() => {
+        fetchAlertHistory();
+    }, [fetchAlertHistory]);
 
     const handleLogout = () => {
         logout();
         router.push("/login");
     };
 
+    // --- DERIVED METRICS ---
+    const safetyScore = useMemo(() => {
+        const recentAlerts = alerts.slice(0, 50);
+        let penalty = 0;
+        recentAlerts.forEach(a => {
+            if (a.severity === 'HIGH') penalty += 5;
+            if (a.severity === 'MEDIUM') penalty += 2;
+        });
+        return Math.max(0, 100 - penalty);
+    }, [alerts]);
+
+    const zoneViolations = useMemo(() => {
+        return alerts.filter(a => a.type === 'ZONE_INTRUSION' && !a.isResolved).length;
+    }, [alerts]);
+
+    const ppeStats = usePPEStats(detections);
+
     return (
-        <main className="h-screen w-full bg-base-950 text-foreground overflow-hidden flex flex-col font-sans select-none">
-            {/* 
-              HEADER: STATUS STRIP 
-              No decoration, pure utility.
-            */}
-            <header className="h-12 shrink-0 border-b border-base-800 bg-base-950 flex items-center justify-between px-4 z-50">
-                {/* Left: Identity & Primary Context */}
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-3.5 h-3.5 bg-foreground/10 rounded-[1px] flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 bg-foreground rounded-[0.5px]" />
-                        </div>
-                        <span className="text-sm font-semibold tracking-tight text-foreground">OPTIVISION</span>
-                    </div>
+        <main className="h-screen bg-base-950 text-foreground font-sans selection:bg-accent selection:text-black overflow-hidden relative flex flex-row">
+            <BackgroundElements />
+            {/* Darker overlay for better contrast */}
+            <div className="absolute inset-0 bg-base-950/20 backdrop-blur-[2px] pointer-events-none" />
 
-                    <div className="h-4 w-px bg-base-800" />
+            {/* 1. SIDEBAR NAVIGATION */}
+            <Sidebar onLogout={handleLogout} />
 
-                    <div className="flex items-center">
-                        <CameraSelector initialCameras={initialCameras} />
-                    </div>
-                </div>
+            {/* Content Area - Adjusted for Sidebar layout */}
+            <div className="flex-1 h-full min-h-0 relative z-10 p-3 pl-0">
+                <div className="grid grid-cols-12 gap-3 h-full">
 
-                {/* Right: System Status & Controls */}
-                <div className="flex items-center gap-6">
-                    {/* System Metrics (Ambient) */}
-                    <div className="group flex items-center gap-2 cursor-help" title="System Latency: 42ms | FPS: 30">
-                        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success' : 'bg-danger'}`} />
-                        <span className="text-[10px] font-mono text-foreground-muted uppercase tracking-wider group-hover:text-foreground transition-colors">
-                            {isConnected ? "Connected" : "Offline"}
-                        </span>
-                    </div>
+                    {/* LEFT COLUMN: LIVE FEED + TIMELINE (Span 8) */}
+                    <div className="col-span-8 flex flex-col gap-3 h-full min-h-0">
+                        {/* Live Feed Container (Flex-1) */}
+                        <div className="flex-1 rounded-2xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-2xl relative flex flex-col group min-h-0">
+                            {/* Inner Highlight */}
+                            <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
 
-                    <div className="h-4 w-px bg-base-800" />
-
-                    {/* Operational Toggles - Icon Based, Latched */}
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={toggleTrails}
-                            className={`p-2 rounded-[2px] transition-all ${showTrails
-                                ? 'bg-base-800 text-accent'
-                                : 'text-foreground-muted hover:text-foreground hover:bg-base-900'
-                                }`}
-                            title="Toggle Motion Trails"
-                        >
-                            <Activity className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => setPrivacyMode(!isPrivacyMode)}
-                            className={`p-2 rounded-[2px] transition-all ${isPrivacyMode
-                                ? 'bg-base-800 text-warning'
-                                : 'text-foreground-muted hover:text-foreground hover:bg-base-900'
-                                }`}
-                            title="Toggle Privacy Mask"
-                        >
-                            {isPrivacyMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                    </div>
-
-                    <div className="h-4 w-px bg-base-800" />
-
-                    {/* Minimal User Menu */}
-                    <div className="flex items-center gap-4">
-                        <button
-                            className="text-foreground-muted hover:text-foreground transition-colors"
-                            title="Settings"
-                        >
-                            <Settings className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="text-foreground-muted hover:text-danger transition-colors"
-                            title="Logout"
-                        >
-                            <LogOut className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            {/* MAIN WORKSPACE GRID */}
-            <div className="flex-1 flex overflow-hidden">
-
-                {/* PRIMARY VIEWPORT: Video & Timeline */}
-                <div className="flex-1 flex flex-col min-w-0 bg-base-900/50">
-
-                    {/* Video Canvas */}
-                    <div className="flex-1 relative bg-[#050505] flex items-center justify-center overflow-hidden border-b border-base-800">
-                        {/* Subtle corner markers for "Canvas" feel */}
-                        <div className="absolute top-4 left-4 w-2 h-2 border-t border-l border-base-700 opacity-50" />
-                        <div className="absolute top-4 right-4 w-2 h-2 border-t border-r border-base-700 opacity-50" />
-                        <div className="absolute bottom-4 left-4 w-2 h-2 border-b border-l border-base-700 opacity-50" />
-                        <div className="absolute bottom-4 right-4 w-2 h-2 border-b border-r border-base-700 opacity-50" />
-
-                        <LiveFeed
-                            frame={frame}
-                            detections={detections}
-                            showTrails={showTrails}
-                            isPrivacyMode={isPrivacyMode}
-                            trails={trails}
-                        />
-                    </div>
-
-                    {/* Timeline Interaction Area */}
-                    <div className="h-40 shrink-0 bg-base-950 border-r border-base-800 flex flex-col relative z-20">
-                        {/* Header strictly for scale context */}
-                        <div className="absolute top-0 left-0 px-2 py-1 bg-base-950/80 backdrop-blur text-[9px] font-mono text-foreground-muted z-10 border-b border-r border-base-800 rounded-br-sm">
-                            T_DOMAIN: REALTIME
-                        </div>
-
-                        <HorizontalTimeline
-                            alerts={alerts}
-                            onAlertClick={setSelectedAlert}
-                        />
-                    </div>
-                </div>
-
-                {/* INSTRUMENT SIDEBAR */}
-                <aside className="w-80 shrink-0 bg-base-950 border-l border-base-800 flex flex-col">
-
-                    {/* Widget: Minimap */}
-                    <div className="flex flex-col border-b border-base-800">
-                        <div className="px-3 py-2 bg-base-950 flex items-center gap-2">
-                            <div className="p-0.5 rounded-[1px] bg-base-900 border border-base-800">
-                                <Cpu className="w-3 h-3 text-foreground-muted" />
+                            {/* Feed Header */}
+                            <div className="absolute top-0 left-0 right-0 z-20 p-3 flex items-center justify-between bg-linear-to-b from-black/60 to-transparent pointer-events-none">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-red-500'} transition-all`} />
+                                    <span className="text-xs font-medium text-white/90 tracking-wide font-mono">
+                                        LIVE FEED_01
+                                    </span>
+                                </div>
+                                <div className="px-2 py-0.5 bg-black/40 rounded border border-white/10 text-[9px] font-mono text-white/60">
+                                    {detections.length} DETECTED
+                                </div>
                             </div>
-                            <span className="text-[10px] uppercase font-bold text-foreground-muted tracking-wider">Spatial Awareness</span>
+
+                            {/* Live Feed Component */}
+                            <div className="flex-1 relative bg-black/20">
+                                <LiveFeed
+                                    frame={frame}
+                                    detections={detections}
+                                    showTrails={showTrails}
+                                    isPrivacyMode={isPrivacyMode}
+                                    trails={{}}
+                                />
+                            </div>
                         </div>
-                        <div className="aspect-video w-full bg-[#050505] relative overflow-hidden group">
-                            {/* Minimap to be refactored for flat SVG feel */}
-                            <Minimap
-                                detections={detections}
-                                calibrationData={activeCamera?.calibrationData}
+
+                        {/* Incident Timeline (Fixed Small Height: 140px) */}
+                        <div className="h-[140px] shrink-0 rounded-2xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-2xl relative flex flex-col">
+                            {/* Inner Highlight */}
+                            <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+                            <HorizontalTimeline
+                                alerts={alerts}
+                                onAlertClick={setSelectedAlert}
                             />
                         </div>
                     </div>
 
-                    {/* Widget: Performance (To be replaced with non-chart metrics) */}
-                    <div className="flex-1 flex flex-col min-h-0 border-b border-base-800">
-                        <div className="px-3 py-2 bg-base-950 flex items-center gap-2 border-b border-base-800/50">
-                            <Activity className="w-3 h-3 text-foreground-muted" />
-                            <span className="text-[10px] uppercase font-bold text-foreground-muted tracking-wider">Productivity Indexes</span>
-                        </div>
-                        <div className="flex-1 p-4 overflow-y-auto">
-                            {/* Placeholder for new linear metrics component */}
-                            <ProductivityChart initialData={initialChartData} />
-                        </div>
-                    </div>
+                    {/* RIGHT COLUMN: COMMAND CENTER (Span 4) */}
+                    <div className="col-span-4 flex flex-col gap-3 h-full min-h-0">
 
-                    {/* Widget: System Log */}
-                    <div className="h-1/3 flex flex-col bg-base-950">
-                        <div className="px-3 py-2 border-y border-base-800 flex items-center justify-between bg-base-900/30">
-                            <span className="text-[10px] uppercase font-bold text-foreground-muted tracking-wider">System Event Log</span>
-                            <span className="text-[9px] font-mono text-accent">LIVE</span>
-                        </div>
-                        <SystemLog />
-                    </div>
+                        {/* 1. MINIMAP (Height ~22%) */}
+                        <div className="h-[22%] rounded-2xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-2xl relative flex flex-col min-h-0">
+                            <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
 
-                </aside>
+                            <div className="absolute top-3 left-4 z-10 flex items-center gap-2">
+                                <Radar className="w-3.5 h-3.5 text-white/40" />
+                                <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Floor Plan</span>
+                            </div>
+
+                            <div className="flex-1 p-2 mt-4 relative">
+                                <Minimap detections={detections} />
+                            </div>
+                        </div>
+
+                        {/* 2. STATS GRID (Height ~18%) */}
+                        <div className="h-[18%] grid grid-cols-2 gap-3 min-h-0">
+                            {/* Productivity (Compact) */}
+                            <div className="rounded-2xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-xl relative p-1 flex flex-col justify-center">
+                                <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+                                <ProductivityChart />
+                            </div>
+
+                            {/* Safety Gauge */}
+                            <div className="rounded-2xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-xl relative p-2 flex flex-col items-center justify-center">
+                                <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+                                <SafetyGauge score={safetyScore} />
+                            </div>
+                        </div>
+
+                        {/* 3. COMPLIANCE TRACKER (Height ~20%) */}
+                        <div className="h-[20%] rounded-2xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-xl relative p-3 flex flex-col min-h-0">
+                            <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+                            <div className="flex items-center gap-2 mb-1 absolute top-3 right-3 opacity-30">
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                            </div>
+                            <ComplianceTracker zoneViolations={zoneViolations} ppeViolations={ppeStats} />
+                        </div>
+
+                        {/* 4. ACTIVITY FEED (Flex Fill) */}
+                        <div className="flex-1 rounded-2xl overflow-hidden bg-black/30 backdrop-blur-3xl border border-white/10 shadow-xl relative p-2 flex flex-col min-h-0">
+                            <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+                            <div className="flex items-center gap-2 mb-1 absolute top-3 right-3 opacity-30">
+                                <Activity className="w-3.5 h-3.5" />
+                            </div>
+                            <RecentActivity alerts={alerts} />
+                        </div>
+
+                    </div>
+                </div>
             </div>
 
-            {/* Modal Layer */}
-            <SnapshotModal
-                alert={selectedAlert}
-                onClose={() => setSelectedAlert(null)}
-            />
+            {/* Snapshot Modal for Alert Details */}
+            {selectedAlert && (
+                <SnapshotModal
+                    alert={selectedAlert}
+                    onClose={() => setSelectedAlert(null)}
+                />
+            )}
         </main>
     );
 }
