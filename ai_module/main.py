@@ -1,342 +1,415 @@
+"""
+OptiVision AI - Main Entry Point
+=================================
+
+Real-time worker safety monitoring with:
+- Worker detection (persons only, no forklifts)
+- Worker re-identification with disappearance tolerance
+- PPE compliance detection (helmet, vest, gloves)
+- Zone intrusion monitoring
+- Real-time streaming to backend via Socket.IO
+
+Usage:
+    python main.py              # Run with default settings
+    python main.py --offline    # Run without backend connection
+
+For standalone testing without backend, use:
+    python analysis_window.py
+"""
+
 import cv2
 import base64
 import socketio
 import time
-import numpy as np
 import os
 import sys
-from ultralytics import YOLO
-import requests
 from dotenv import load_dotenv
+
+# Add current directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from config import get_settings
+from core import Detector
+from core.zone_monitor import ZoneEvent
 from utils.api_manager import APIManager
 
 # Load environment variables
 load_dotenv()
 
-# Configuration
-BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:3000')
-VIDEO_SOURCE = os.getenv('VIDEO_SOURCE', '0')
-try:
-    VIDEO_SOURCE = int(VIDEO_SOURCE) # Try to convert to int for webcam index
-except ValueError:
-    pass # Keep as string for file path
 
-AI_DEVICE = os.getenv('AI_DEVICE', 'cpu')
-import torch
-if torch.cuda.is_available() and AI_DEVICE != 'cpu':
-    print(f"🚀 Acceleration Enabled: {torch.cuda.get_device_name(0)}")
-else:
-    print(f"⚠️ GPU not detected or not requested. Device: {AI_DEVICE}")
-
-# Initialize Socket.IO Client
-sio = socketio.Client()
-
-# State Management
-worker_states = {} # { track_id: { last_pos: (x,y), last_active_time: timestamp, is_idle: bool } }
-zones = [] # List of polygons from backend: [{id, coordinates: [[x,y]...], type}]
-alert_cooldowns = {} # { track_id: timestamp }
-ALERT_COOLDOWN_SECONDS = 10
-
-api_manager = APIManager()
-
-# Idle Constants
-IDLE_THRESHOLD_PIXELS = 20 # Minimum movement to be considered "active"
-IDLE_TIME_SECONDS = 30 # Time before marking as idle
-
-# Global Flags
-privacy_mode = False
-
-# Initialize YOLO Model
-print("⏳ Loading YOLO Model (this may take a moment)...")
-try:
-    model = YOLO('yolo11n.pt') # Will download automatically if not present
-    print("✅ YOLO Model Loaded")
-except Exception as e:
-    print(f"⚠️ Failed to load yolo11n.pt, falling back to yolov8n.pt: {e}")
-    model = YOLO('yolov8n.pt')
-
-# --- Zone Parsing Helper ---
-def parse_zones(data):
-    parsed_zones = []
-    print(f"🔄 Processing {len(data)} zones...")
-    for z in data:
-        try:
-            # Assuming coordinates come as stringified JSON or direct array
-            coords = z.get('coordinates')
-            if isinstance(coords, str):
-                import json
-                try:
-                    coords = json.loads(coords)
-                except json.JSONDecodeError:
-                    # Fallback for "0 0 0" or space separated format
-                    # If it's just "0 0 0", it's likely invalid for a polygon.
-                    # We'll try to split and see if we have pairs, but "0 0 0" is 3 items -> invalid.
-                    print(f"⚠️ JSON parse failed for zone {z.get('id')}. Raw: '{coords}'")
-                    coords = [] # Treat as empty/invalid to avoid crash
+class OptiVisionAI:
+    """
+    Main OptiVision AI application.
+    
+    Coordinates video capture, AI detection, and backend communication.
+    """
+    
+    def __init__(self, offline_mode: bool = False):
+        """
+        Initialize the AI module.
+        
+        Args:
+            offline_mode: If True, skip backend connection
+        """
+        self.settings = get_settings()
+        self.offline_mode = offline_mode
+        
+        # Initialize Socket.IO client
+        self.sio = socketio.Client()
+        self._setup_socket_events()
+        
+        # Initialize API manager (for REST calls)
+        self.api_manager = APIManager()
+        
+        # Initialize core detector
+        self.detector = Detector(on_zone_event=self._on_zone_event)
+        
+        # Alert cooldowns
+        self.alert_cooldowns = {}
+        
+        # Privacy mode flag
+        self.privacy_mode = False
+        
+        # Activity logging
+        self.last_activity_log_time = 0
+        
+        # Running state
+        self.running = False
+    
+    def _setup_socket_events(self):
+        """Setup Socket.IO event handlers."""
+        
+        @self.sio.event
+        def connect():
+            print(f"✅ Connected to Backend at {self.settings.backend_url}")
+        
+        @self.sio.event
+        def disconnect():
+            print("❌ Disconnected from Backend")
+        
+        @self.sio.on('zone_update')
+        def on_zone_update(data):
+            """Handle zone updates from backend/frontend."""
+            action = data.get('action') if isinstance(data, dict) else None
+            zone_data = data.get('zone') if isinstance(data, dict) else None
             
-            # Ensure coords is a numpy array of points (int32) for OpenCV
-            if coords:
-                pts = np.array(coords, np.int32)
-                pts = pts.reshape((-1, 1, 2))
-                parsed_zones.append({
-                    "id": z.get('id'),
-                    "type": z.get('type', 'DANGER'),
-                    "poly": pts
-                })
-        except Exception as e:
-            print(f"⚠️ Failed to parse zone {z.get('id')}: {e}")
-            print(f"Propblematic Coords: {z.get('coordinates')} (Type: {type(z.get('coordinates'))})")
-    return parsed_zones
-
-# --- Initial Zone Fetch ---
-try:
-    initial_zones = api_manager.fetch_zones()
-    zones = parse_zones(initial_zones)
-except Exception as e:
-    print(f"⚠️ Initial zone fetch failed: {e}")
-
-# --- Socket Events ---
-@sio.event
-def connect():
-    print(f"✅ Connected to Backend at {BACKEND_URL}")
-
-@sio.event
-def disconnect():
-    print("❌ Disconnected from Backend")
-
-@sio.on('zone_update')
-def on_zone_update(data):
-    """
-    Receive updated zones from backend.
-    """
-    global zones
-    zones = parse_zones(data)
-
-@sio.on('toggle_settings')
-def on_toggle_settings(data):
-    global privacy_mode
-    if 'privacyMode' in data:
-        privacy_mode = data['privacyMode']
-        print(f"🔒 Privacy Mode: {'ON' if privacy_mode else 'OFF'}")
-
-# --- Helper Functions ---
-def check_zone_intrusion(x, y):
-    """
-    Check if a point (feet position) is inside any defined zone.
-    Returns: zone_type if inside, else None
-    """
-    for zone in zones:
-        # pointPolygonTest returns >0 if inside, 0 on edge, <0 outside
-        dist = cv2.pointPolygonTest(zone['poly'], (x, y), False)
-        if dist >= 0:
-            return zone['type']
-    return None
-
-def update_worker_state(track_id, x, y):
-    """
-    Update worker movement history and determine IDLE state.
-    """
-    current_time = time.time()
-    
-    if track_id not in worker_states:
-        worker_states[track_id] = {
-            'last_pos': (x, y),
-            'last_active_time': current_time,
-            'is_idle': False
-        }
-        return False
-    
-    state = worker_states[track_id]
-    last_x, last_y = state['last_pos']
-    
-    # Calculate distance moved
-    dist = np.sqrt((x - last_x)**2 + (y - last_y)**2)
-    
-    if dist > IDLE_THRESHOLD_PIXELS:
-        # Worker moved significantly, reset idle timer
-        state['last_pos'] = (x, y)
-        state['last_active_time'] = current_time
-        state['is_idle'] = False
-    else:
-        # Worker stationary
-        time_stationary = current_time - state['last_active_time']
-        if time_stationary > IDLE_TIME_SECONDS:
-            state['is_idle'] = True
-            
-    return state['is_idle']
-
-# --- Main Application Loop ---
-def main():
-    # Connect to Socket
-    try:
-        sio.connect(BACKEND_URL)
-    except Exception as e:
-        print(f"⚠️ Could not connect to backend: {e}")
-        print("Running in offline mode (no streaming)")
-
-    # Open Video Source
-    cap = cv2.VideoCapture(VIDEO_SOURCE)
-    
-    if not cap.isOpened():
-        print(f"❌ Error: Could not open video source {VIDEO_SOURCE}")
-        return
-
-    print("🎥 Starting Video Loop... Press Ctrl+C to stop.")
-
-    try:
-        while True:
-            success, frame = cap.read()
-            if not success:
-                # If file, loop it; if stream, break
-                if isinstance(VIDEO_SOURCE, str):
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                    continue
+            try:
+                if action == 'created' and zone_data:
+                    self.detector.add_zone(zone_data)
+                elif action == 'deleted' and zone_data:
+                    self.detector.remove_zone(str(zone_data.get('id')))
+                elif isinstance(data, list):
+                    # Full zone list update
+                    self.detector.update_zones(data)
                 else:
-                    break
-
-            # Resize for performance if needed (optional)
-            # frame = cv2.resize(frame, (1280, 720))
-
-            # --- AI INFERENCE ---
-            # Run YOLO with Tracking
-            # classes=0 (Person), classes=[0, ...] for more.
-            # For Forklift, we might need a custom model or map 'truck'/'car' (classes 2, 7) to 'Forklift'
-            results = model.track(frame, persist=True, verbose=False, classes=[0, 2, 7], device=AI_DEVICE) 
-
-            detection_metadata = []
+                    print(f"⚠️ Unknown zone_update format: {type(data)}")
+            except Exception as e:
+                print(f"❌ Error processing zone_update: {e}")
+        
+        @self.sio.on('toggle_settings')
+        def on_toggle_settings(data):
+            if 'privacyMode' in data:
+                self.privacy_mode = data['privacyMode']
+                print(f"🔒 Privacy Mode: {'ON' if self.privacy_mode else 'OFF'}")
+    
+    def _on_zone_event(self, event: ZoneEvent):
+        """Handle zone events from the detector."""
+        current_time = time.time()
+        
+        if event.event_type == 'VIOLATION':
+            # Send alert with cooldown
+            cooldown_key = f"zone_{event.worker_id}_{event.zone_id}"
+            last_alert = self.alert_cooldowns.get(cooldown_key, 0)
             
-            # Annotate Frame manually to control look/feel or use overlay
-            # For now, let YOLO plot, but we can customize
-            annotated_frame = frame.copy() 
-            
-            if hasattr(results[0].boxes, 'id') and results[0].boxes.id is not None:
-                boxes = results[0].boxes.xyxy.cpu().numpy()
-                track_ids = results[0].boxes.id.int().cpu().tolist()
-                classes = results[0].boxes.cls.int().cpu().tolist()
-                confs = results[0].boxes.conf.cpu().tolist()
-
-                for box, track_id, cls, conf in zip(boxes, track_ids, classes, confs):
-                    x1, y1, x2, y2 = box
-                    center_x = int((x1 + x2) / 2)
-                    bottom_y = int(y2) # Feet position
+            if current_time - last_alert > self.settings.alert_cooldown_seconds:
+                print(f"🚨 ZONE VIOLATION: Worker {event.worker_id} in {event.zone_name}")
+                
+                # We'll capture snapshot in main loop when we have the frame
+                self.alert_cooldowns[cooldown_key] = current_time
+    
+    def _send_zone_alert(self, event: ZoneEvent, snapshot_base64: str = None):
+        """Send a zone intrusion alert to the backend."""
+        self.api_manager.send_alert(
+            type="ZONE_INTRUSION",
+            severity="HIGH",
+            message=f"Worker {event.worker_id} entered {event.zone_type} zone: {event.zone_name}",
+            camera_id=1,
+            snapshot=snapshot_base64
+        )
+    
+    def _send_ppe_alert(self, worker_id: int, violations: list, snapshot_base64: str = None):
+        """Send a PPE violation alert to the backend."""
+        violation_text = ', '.join(v.replace('_', ' ') for v in violations)
+        self.api_manager.send_alert(
+            type="PPE_VIOLATION",
+            severity="MEDIUM",
+            message=f"Worker {worker_id}: {violation_text}",
+            camera_id=1,
+            snapshot=snapshot_base64
+        )
+    
+    def _connect_backend(self):
+        """Connect to the backend via Socket.IO."""
+        if self.offline_mode:
+            print("ℹ️ Running in offline mode (no backend connection)")
+            return
+        
+        try:
+            print(f"🔌 Connecting to backend at {self.settings.backend_url}...")
+            self.sio.connect(self.settings.backend_url)
+        except Exception as e:
+            print(f"⚠️ Could not connect to backend: {e}")
+            print("   Running in offline mode (no streaming)")
+    
+    def _fetch_initial_zones(self):
+        """Fetch initial zones from backend."""
+        if self.offline_mode:
+            return
+        
+        try:
+            zones_data = self.api_manager.fetch_zones()
+            if zones_data:
+                self.detector.update_zones(zones_data)
+        except Exception as e:
+            print(f"⚠️ Initial zone fetch failed: {e}")
+    
+    def _log_activity(self):
+        """Send activity logs to backend periodically."""
+        if self.offline_mode:
+            return
+        
+        current_time = time.time()
+        if current_time - self.last_activity_log_time < 5:  # Log every 5 seconds
+            return
+        
+        workers = self.detector.worker_tracker.get_all_workers()
+        if workers:
+            print(f"⏱️ Syncing Activity Logs for {len(workers)} workers...")
+            for worker in workers:
+                action = "IDLE" if worker.is_idle else "WORKING"
+                self.api_manager.send_activity(
+                    worker_id=worker.track_id,
+                    action=action,
+                    duration=5,
+                    camera_id=1
+                )
+        
+        self.last_activity_log_time = current_time
+    
+    def run(self):
+        """Main application loop."""
+        print("=" * 60)
+        print("🤖 OptiVision AI - Worker Safety Monitoring")
+        print("=" * 60)
+        
+        # Load models
+        try:
+            self.detector.load_models()
+        except Exception as e:
+            print(f"❌ Failed to load models: {e}")
+            return
+        
+        # Connect to backend
+        self._connect_backend()
+        
+        # Fetch initial zones
+        self._fetch_initial_zones()
+        
+        # Open video source
+        video_source = self.settings.get_video_source()
+        cap = cv2.VideoCapture(video_source)
+        
+        if not cap.isOpened():
+            print(f"❌ Error: Could not open video source {video_source}")
+            return
+        
+        # Get video dimensions
+        video_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 1280
+        video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 720
+        print(f"📐 Video dimensions: {int(video_width)}x{int(video_height)}")
+        
+        print()
+        print("🎥 Starting Video Loop... Press Ctrl+C to stop.")
+        print()
+        
+        self.running = True
+        frame_time = 1.0 / self.settings.target_fps
+        
+        try:
+            while self.running:
+                loop_start = time.time()
+                
+                success, frame = cap.read()
+                if not success:
+                    # Loop video files
+                    if isinstance(video_source, str):
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                        continue
+                    else:
+                        break
+                
+                # Run detection pipeline
+                result = self.detector.detect(frame, video_width, video_height)
+                
+                # Process alerts
+                self._process_alerts(frame, result)
+                
+                # Log activity
+                self._log_activity()
+                
+                # Apply privacy mode if enabled
+                annotated_frame = frame.copy()
+                if self.privacy_mode:
+                    annotated_frame = cv2.GaussianBlur(annotated_frame, (99, 99), 30)
+                    cv2.putText(annotated_frame, "PRIVACY MODE ACTIVE", (50, 50),
+                               cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                else:
+                    # Draw detection overlays
+                    annotated_frame = self._draw_overlays(annotated_frame, result)
+                
+                # Stream to backend
+                if not self.offline_mode and self.sio.connected:
+                    self._stream_frame(annotated_frame, result)
+                
+                # Rate limiting
+                elapsed = time.time() - loop_start
+                if elapsed < frame_time:
+                    time.sleep(frame_time - elapsed)
+        
+        except KeyboardInterrupt:
+            print("\n🛑 Stopping...")
+        finally:
+            self.running = False
+            cap.release()
+            if not self.offline_mode:
+                self.sio.disconnect()
+            print("👋 AI Module Stopped")
+    
+    def _process_alerts(self, frame, result):
+        """Process and send alerts for violations."""
+        current_time = time.time()
+        
+        for worker in result.workers:
+            # Zone alerts
+            if worker.current_zone and 'DANGER' in (worker.current_zone.upper() or ''):
+                cooldown_key = f"zone_{worker.track_id}"
+                last_alert = self.alert_cooldowns.get(cooldown_key, 0)
+                
+                if current_time - last_alert > self.settings.alert_cooldown_seconds:
+                    # Capture snapshot
+                    _, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+                    snapshot = base64.b64encode(buffer).decode('utf-8')
                     
-                    label = model.names[cls]
-                    if label in ['car', 'truck', 'bus']:
-                        label = 'Forklift' # Crude mapping for hackathon
-                    
-                    # --- IDLE LOGIC ---
-                    is_idle = False
-                    if label == 'person':
-                        is_idle = update_worker_state(track_id, center_x, bottom_y)
-                    
-                    # --- ZONE LOGIC ---
-                    zone_type = check_zone_intrusion(center_x, bottom_y)
-
-                    # --- ALERT LOGIC ---
-                    if zone_type == 'DANGER':
-                        current_time = time.time()
-                        last_alert = alert_cooldowns.get(track_id, 0)
-                        
-                        if current_time - last_alert > ALERT_COOLDOWN_SECONDS:
-                            print(f"🚨 TRIGGERING ALERT: Worker {track_id} in DANGER ZONE")
-                            # Send snapshot? (Optional optimization: catch frame)
-                            # For now just send message
-                            api_manager.send_alert(
-                                type="ZONE_INTRUSION",
-                                severity="HIGH",
-                                message=f"Worker {track_id} entered a DANGER zone.",
-                                camera_id=1
-                            )
-                            alert_cooldowns[track_id] = current_time
-                    
-                    # --- METADATA ---
-                    detection_metadata.append({
-                        "id": track_id,
-                        "x": float(x1),
-                        "y": float(y1),
-                        "width": float(x2 - x1),
-                        "height": float(y2 - y1),
-                        "label": label,
-                        "confidence": float(conf),
-                        "workerId": str(track_id), # Map track ID to worker ID
-                        "isIdle": is_idle,
-                        "zone": zone_type
-                    })
-
-                    # Custom Drawing (Overlay)
-                    color = (0, 255, 0) # Green
-                    if is_idle: color = (255, 0, 0) # Blue for Idle
-                    if zone_type == 'DANGER': color = (0, 0, 255) # Red for Danger
-                    if label == 'Forklift': color = (0, 165, 255) # Orange
-
-                    # Draw Box
-                    cv2.rectangle(annotated_frame, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
-                    
-                    # Draw Label
-                    text = f"ID:{track_id} {label}"
-                    if is_idle: text += " (IDLE)"
-                    if zone_type: text += f" [{zone_type}]"
-                    
-                    cv2.putText(annotated_frame, text, (int(x1), int(y1)-5), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                    
-            # --- ACTIVITY LOGGING (HEARTBEAT) ---
-            current_time = time.time()
-            if 'last_activity_log_time' not in locals():
-                last_activity_log_time = current_time
-
-            if current_time - last_activity_log_time > 5: # Log every 5 seconds
-                print(f"⏱️ Syncing Activity Logs for {len(worker_states)} workers...")
-                for t_id, state in worker_states.items():
-                    # We assume if they are in worker_states, they are currently tracked or recently tracked.
-                    # Ideally we should filter by recent visibility, but for now log all valid states.
-                    # Simple heuristic: Only log if we saw them recently (e.g. < 5s ago)
-                    # For this MVP, we log whatever state is current.
-                    
-                    action = "IDLE" if state['is_idle'] else "WORKING"
-                    # Send 5 seconds worth of duration
-                    api_manager.send_activity(
-                        worker_id=t_id,
-                        action=action,
-                        duration=5,
-                        camera_id=1
+                    self.api_manager.send_alert(
+                        type="ZONE_INTRUSION",
+                        severity="HIGH",
+                        message=f"Worker {worker.track_id} in DANGER zone: {worker.current_zone}",
+                        camera_id=1,
+                        snapshot=snapshot
                     )
-                last_activity_log_time = current_time
+                    self.alert_cooldowns[cooldown_key] = current_time
+            
+            # PPE alerts
+            ppe_result = result.ppe_results.get(worker.track_id)
+            if ppe_result and ppe_result.violations:
+                cooldown_key = f"ppe_{worker.track_id}"
+                last_alert = self.alert_cooldowns.get(cooldown_key, 0)
+                
+                if current_time - last_alert > self.settings.alert_cooldown_seconds:
+                    # Capture snapshot
+                    _, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+                    snapshot = base64.b64encode(buffer).decode('utf-8')
+                    
+                    self._send_ppe_alert(worker.track_id, ppe_result.violations, snapshot)
+                    self.alert_cooldowns[cooldown_key] = current_time
+    
+    def _draw_overlays(self, frame, result):
+        """Draw detection overlays on the frame."""
+        # Draw workers
+        for det in result.raw_detections:
+            box = det['box']
+            track_id = det['track_id']
+            x1, y1, x2, y2 = [int(v) for v in box]
+            
+            # Get worker state
+            worker = self.detector.worker_tracker.get_worker(track_id)
+            ppe_result = result.ppe_results.get(track_id)
+            
+            # Determine color
+            color = (0, 255, 0)  # Green - active
+            if worker and worker.is_idle:
+                color = (255, 165, 0)  # Orange - idle
+            if worker and worker.current_zone and 'DANGER' in (worker.current_zone.upper() or ''):
+                color = (0, 0, 255)  # Red - danger zone
+            
+            # Draw box
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            
+            # Build label
+            label = f"ID:{track_id}"
+            if worker and worker.is_idle:
+                label += " (IDLE)"
+            if worker and worker.current_zone:
+                label += f" [{worker.current_zone}]"
+            
+            cv2.putText(frame, label, (x1, y1 - 5),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        
+        return frame
+    
+    def _stream_frame(self, frame, result):
+        """Stream frame and metadata to backend via Socket.IO."""
+        # Compress to JPEG
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), self.settings.stream_jpeg_quality]
+        _, buffer = cv2.imencode('.jpg', frame, encode_param)
+        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+        
+        # Build metadata
+        boxes = []
+        for worker in result.workers:
+            # Find corresponding raw detection
+            raw_det = next((d for d in result.raw_detections 
+                           if d['track_id'] == worker.track_id), None)
+            if not raw_det:
+                continue
+            
+            ppe = result.ppe_results.get(worker.track_id)
+            
+            boxes.append({
+                'id': worker.track_id,
+                'x': raw_det['box'][0],
+                'y': raw_det['box'][1],
+                'width': raw_det['width'],
+                'height': raw_det['height'],
+                'label': 'person',
+                'confidence': raw_det['confidence'],
+                'workerId': str(worker.track_id),
+                'isIdle': worker.is_idle,
+                'zone': worker.current_zone,
+                'minimapX': raw_det['minimap_x'],
+                'minimapY': raw_det['minimap_y'],
+                'ppeViolation': ppe.violations[0] if ppe and ppe.violations else None
+            })
+        
+        # Emit to backend
+        self.sio.emit('stream_data', {
+            'image': jpg_as_text,
+            'boxes': boxes
+        })
 
-            # --- PRIVACY MODE ---
-            if privacy_mode:
-                annotated_frame = cv2.GaussianBlur(annotated_frame, (99, 99), 30)
-                cv2.putText(annotated_frame, "PRIVACY MODE ACTIVE", (50, 50), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-            # --- STREAMING ---
-            # Compress to JPEG
-            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 60]
-            _, buffer = cv2.imencode('.jpg', annotated_frame, encode_param)
-            jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+def main():
+    """Main entry point."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="OptiVision AI Module")
+    parser.add_argument('--offline', action='store_true',
+                       help='Run without backend connection')
+    args = parser.parse_args()
+    
+    app = OptiVisionAI(offline_mode=args.offline)
+    app.run()
 
-            # Emit to Backend
-            if sio.connected:
-                sio.emit('stream_data', {
-                    'image': jpg_as_text,
-                    'boxes': detection_metadata
-                })
-
-            # Show local window (optional, good for debug)
-            # cv2.imshow('OptiVision AI', annotated_frame)
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-            #     break
-
-            # Rate Limit (approx 30 FPS)
-            time.sleep(0.033)
-
-    except KeyboardInterrupt:
-        print("🛑 Stopping...")
-    finally:
-        cap.release()
-        cv2.destroyAllWindows()
-        sio.disconnect()
-        print("👋 AI Module Stopped")
 
 if __name__ == "__main__":
     main()
