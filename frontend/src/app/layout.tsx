@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
+import { Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const ibmPlexSans = IBM_Plex_Sans({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -30,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${ibmPlexSans.variable} ${jetbrainsMono.variable} antialiased bg-base-950 text-foreground`}
+        className={`${outfit.variable} ${jetbrainsMono.variable} antialiased bg-base-950 text-foreground`}
       >
         <AuthGuard>
           {children}

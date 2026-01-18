@@ -2,29 +2,33 @@
 
 :root {
   /* 
-   * INDUSTRIAL CONTROL SYSTEM PALETTE (REFINED)
-   * Strict adherence to Slate/Zinc neutral tones. 
-   * No blue-shifting or cool-tints unless explicit.
+   * PREMIUM GLASSMORPHISM PALETTE
+   * Engineered, atmospheric, and reactive.
    */
 
-  /* Base Layer - High Contrast, Low Noise */
-  --color-base-950: #09090b; /* Main canvas background */
-  --color-base-900: #121215; /* Panels (Darker than before for depth) */
-  --color-base-800: #27272a; /* Borders */
-  --color-base-700: #3f3f46; /* Active Borders / Hovers */
+  /* Base Backgrounds - Deep, Void-like */
+  --color-base-950: #050505; /* True void */
+  --color-base-900: #0a0a0a; /* Deep matte */
+  --color-base-800: #121212; /* Surface base */
 
-  /* Text Layers - legible but not blinding */
-  --foreground: #e4e4e7; /* Primary readouts (Zinc 200) */
-  --foreground-muted: #71717a; /* Secondary labels (Zinc 500) - Dimmer for hierarchy */
-  --foreground-dark: #3f3f46; /* Disabled / Watermarks */
+  /* Glass Layers - Structural & Hierarchical */
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-surface: rgba(255, 255, 255, 0.03);
+  --glass-surface-highlight: rgba(255, 255, 255, 0.05);
 
-  /* Semantic Signal Colors - Pure & Flat */
-  --color-accent: #3b82f6; /* Action Blue */
-  --color-accent-dim: rgba(59, 130, 246, 0.1);
+  --glass-depth-1: rgba(0, 0, 0, 0.4); /* Deepest layer */
+  --glass-depth-2: rgba(20, 20, 20, 0.5); /* Mid layer */
+  --glass-depth-3: rgba(255, 255, 255, 0.02); /* Top interaction layer */
 
-  --color-warning: #f59e0b; /* Amber 500 - Stronger for visibility */
-  --color-danger: #ef4444; /* Red 500 */
-  --color-success: #10b981; /* Emerald 500 */
+  /* Typography */
+  --foreground: #ececf1; /* High contrast, cool white */
+  --foreground-muted: #a1a1aa; /* Technical grey */
+  --foreground-dim: #52525b; /* Subdued data */
+
+  /* Accents - Single sharp color (Amber/Orange) for focus */
+  --color-accent: #f59e0b;
+  --color-accent-dim: rgba(245, 158, 11, 0.1);
+  --color-accent-glow: rgba(245, 158, 11, 0.3);
 
   --background: var(--color-base-950);
 }
@@ -36,72 +40,104 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--foreground-muted);
+  --color-dim: var(--foreground-dim);
 
-  --color-base-950: var(--color-base-950);
-  --color-base-900: var(--color-base-900);
-  --color-base-800: var(--color-base-800);
-  --color-base-700: var(--color-base-700);
+  --color-glass-border: var(--glass-border);
+  --color-glass-surface: var(--glass-surface);
 
   --color-accent: var(--color-accent);
-  --color-warning: var(--color-warning);
-  --color-danger: var(--color-danger);
-  --color-success: var(--color-success);
+  --color-accent-glow: var(--color-accent-glow);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 1s ease-out forwards;
+  --animate-fade-in-up: fadeInUp 0.8s ease-out forwards;
+  --animate-glass-shimmer: glassShimmer 3s linear infinite;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv05";
   -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.01em;
-  overflow: hidden; /* App-like feel */
+  min-height: 100vh;
+  overflow-x: hidden;
+  selection-background-color: var(--color-accent);
+  selection-color: #000;
 }
 
 /* 
- * UTILITY CLASSES 
- * Strict "No Decoration" Policy
+ * UTILITIES
+ * Structural Glass Classes
  */
 
-/* Typography */
-.text-mono-tight {
-  font-family: var(--font-mono);
-  letter-spacing: -0.05em;
-  font-feature-settings: "tnum";
+.glass-panel {
+  background: var(--glass-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* Reset all shadows/glows */
-* {
-  box-shadow: none !important;
-  text-shadow: none !important;
+.glass-card {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Scrollbar - Hidden by default, visible on hover if needed, or very subtle */
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+}
+
+/* Typography Utilities */
+.text-display {
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-base-950);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-base-800);
-  border-radius: 0px;
+  background: var(--glass-border);
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-base-700);
-}
-
-/* Utility: Layering */
-.layer-canvas {
-  z-index: 10;
-}
-.layer-overlay {
-  z-index: 20;
-}
-.layer-ui {
-  z-index: 30;
-}
-.layer-modal {
-  z-index: 50;
+  background: var(--foreground-dim);
 }

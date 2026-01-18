@@ -8,14 +8,25 @@ const PUBLIC_ROUTES = ["/", "/login", "/register"];
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { token, hydrateFromStorage } = useAuthStore();
+    const { token, hydrateFromStorage, verifySession } = useAuthStore();
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
-        // Restore auth state from storage on mount
-        hydrateFromStorage();
-        setIsReady(true);
-    }, [hydrateFromStorage]);
+        const initAuth = async () => {
+            // Restore auth state from storage on mount
+            hydrateFromStorage();
+
+            // If we have a token, verify it's still valid with the backend
+            const storedToken = localStorage.getItem("token");
+            if (storedToken) {
+                await verifySession();
+            }
+
+            setIsReady(true);
+        };
+
+        initAuth();
+    }, [hydrateFromStorage, verifySession]);
 
     useEffect(() => {
         if (!isReady) return;

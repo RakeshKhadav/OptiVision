@@ -11,6 +11,6 @@ const router = Router();
 
 router.post('/', authenticateApiKeyOrToken, createActivity);
 router.get('/', authenticate, getAllActivities);
-router.get('/stats', authenticate, getStatsOfActivities);
+router.get('/stats', authenticateApiKeyOrToken, getStatsOfActivities);
 
 export default router;

@@ -20,14 +20,14 @@ export default function Minimap({ detections, calibrationData }: MinimapProps) {
         <div className="relative w-full h-full">
             {/* 
               FLOOR PLAN SVG
-              Ideally this is a clean SVG. Using the image for now but applying filters 
-              to make it look like a CAD drawing.
+              High-fidelity, themed technical drawing.
             */}
             <div className="absolute inset-0 z-0 flex items-center justify-center p-4">
                 <img
-                    src="/floorplan-base.svg"
-                    alt="Floor Plan"
-                    className="max-w-full max-h-full opacity-40 grayscale invert brightness-150 contrast-125 select-none"
+                    src="/warehouse_minimap.svg"
+                    alt="Warehouse Floor Plan"
+                    className="max-w-full max-h-full opacity-60 select-none"
+                    draggable={false}
                 />
             </div>
 
@@ -35,12 +35,20 @@ export default function Minimap({ detections, calibrationData }: MinimapProps) {
             <div className="absolute inset-0 z-10 m-4">
                 {detections.map((det) => {
                     let mx = 0, my = 0;
-                    if (homographyMatrix) {
+
+                    // Priority 1: AI-provided 1:1 coordinates
+                    if (typeof det.minimapX === 'number' && typeof det.minimapY === 'number') {
+                        mx = det.minimapX;
+                        my = det.minimapY;
+                    }
+                    // Priority 2: Client-side homography (legacy/fallback)
+                    else if (homographyMatrix) {
                         const pt = applyHomography(homographyMatrix, det.x + det.width / 2, det.y + det.height);
                         mx = (pt.x / 800) * 100;
                         my = (pt.y / 600) * 100;
-                    } else {
-                        // Crude Fallback for dev
+                    }
+                    // Priority 3: Crude Fallback
+                    else {
                         mx = ((det.x + det.width / 2) / 1280) * 100;
                         my = ((det.y + det.height) / 720) * 100;
                     }

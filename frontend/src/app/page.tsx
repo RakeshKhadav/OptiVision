@@ -1,214 +1,157 @@
+"use client";
+
+import React, { useRef } from "react";
+import SplineScene from "@/components/landing/SplineScene";
+import { OrbitalCard } from "@/components/landing/OrbitalCard";
+import { Shield, Zap, Activity, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { ArrowRight, Terminal, Activity, Zap, Shield, ChevronRight } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import LandingNavbar from "@/components/landing/LandingNavbar";
+import BackgroundElements from "@/components/landing/BackgroundElements";
+import LandingFooter from "@/components/landing/LandingFooter";
+
+const FEATURES = [
+    {
+        id: 1,
+        title: "Zone Violation Systems",
+        desc: "Our YOLOv11 engine continuously scans for PPE non-compliance and hazardous zone intrusions. Sub-second latency ensures accidents are prevented before they happen.",
+        icon: <Shield className="w-6 h-6 text-accent" />,
+        align: "left" as const
+    },
+    {
+        id: 2,
+        title: "Velocity Tracking",
+        desc: "Identify bottlenecks and idle time with precision. Our algorithms track asset movement vectors to calculate real-time efficiency scores without compromising individual privacy.",
+        icon: <Zap className="w-6 h-6 text-blue-400" />,
+        align: "right" as const
+    },
+    {
+        id: 3,
+        title: "Live Floor Mapping",
+        desc: "Transform raw 2D video feeds into a comprehensive top-down tactical map. Visualize every moving asset in your facility as a live data point on a digital twin.",
+        icon: <Activity className="w-6 h-6 text-emerald-400" />,
+        align: "left" as const
+    }
+];
 
 export default function Home() {
-  return (
-    <main className="min-h-screen bg-base-950 text-foreground font-sans selection:bg-accent/20 selection:text-accent flex flex-col">
-      {/* Navigation - Ultra Minimal */}
-      <nav className="border-b border-base-800 bg-base-950/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-foreground rounded-sm" />
-            <span className="font-bold tracking-tight text-xs uppercase text-foreground-muted">OptiVision Systems</span>
-          </div>
-          <div className="flex items-center gap-6 text-xs font-medium font-mono">
-            <Link href="/login" className="text-foreground-muted hover:text-foreground transition-colors uppercase tracking-wider">
-              [Log_in]
-            </Link>
-            <Link
-              href="/register"
-              className="text-accent hover:text-accent/80 transition-colors uppercase tracking-wider flex items-center gap-1"
-            >
-              Request_Access <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
-      </nav>
+    const orbitalContainerRef = useRef<HTMLDivElement>(null);
 
-      {/* Hero Section - Technical & Direct */}
-      <section className="pt-32 pb-24 px-6 border-b border-base-800 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="space-y-10">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-2 py-1 bg-base-900 border border-base-800 rounded-sm">
-                <div className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
-                <span className="text-[10px] font-mono text-foreground-muted uppercase tracking-widest">System Nominal // v2.4.0</span>
-              </div>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter leading-[0.9] text-foreground">
-                DETERMINISTIC<br />
-                VIDEO<br />
-                ANALYTICS.
-              </h1>
-              <p className="text-lg text-foreground-muted leading-relaxed max-w-md font-light">
-                Industrial-grade observability for complex environments.
-                Extract structured event data from chaotic visual streams with predictable latency.
-              </p>
+    // Track scroll progress specifically for the orbital section
+    const { scrollYProgress } = useScroll({
+        target: orbitalContainerRef,
+        offset: ["start end", "end start"] // Start tracking as it enters view
+    });
+
+    // Remap the progress to be 0-1 ONLY while the sticky part is relevant.
+    // The container is 400vh.
+    // 0.0 - 0.25: Entering
+    // 0.25 - 0.75: Active Scrolling (Sticky Phase)
+    // 0.75 - 1.0: Exiting
+
+    // We want the card animations to happen during the middle chunk of internal scroll
+    const orbitalProgress = useTransform(scrollYProgress, [0.1, 0.9], [0, 1]);
+
+    return (
+        <main className="relative bg-base-950 text-foreground selection:bg-accent selection:text-black min-h-screen">
+            <LandingNavbar />
+
+            {/* 1. FIXED BACKGROUND LAYER - Persistent across all sections */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <BackgroundElements />
+                <SplineScene />
+                {/* Dark Gradient Overlay */}
+                <div className="absolute inset-0 bg-linear-to-t from-base-950/80 via-transparent to-base-950/80 opacity-80" />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <Link
-                href="/dashboard"
-                className="group inline-flex items-center justify-center gap-3 px-6 py-3 bg-foreground text-base-950 font-bold text-sm uppercase tracking-wide rounded-sm hover:bg-white transition-all transform active:scale-95"
-              >
-                Launch Console
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="#"
-                className="group inline-flex items-center justify-center gap-3 px-6 py-3 border border-base-700 text-foreground font-medium text-sm uppercase tracking-wide rounded-sm hover:bg-base-900 transition-all"
-              >
-                Read Documentation
-              </Link>
-            </div>
-          </div>
+            {/* 2. SCROLLABLE CONTENT LAYER */}
+            <div className="relative z-10 w-full">
 
-          {/* Visual: Abstract Data Stream (CSS Animation) */}
-          <div className="relative aspect-square lg:aspect-4/3 bg-base-950 border border-base-800 rounded-sm overflow-hidden flex flex-col font-mono text-[10px] text-foreground-muted select-none">
-            {/* Header */}
-            <div className="h-8 border-b border-base-800 bg-base-900 flex items-center px-3 justify-between">
-              <span className="text-foreground-dark">TERM_01</span>
-              <div className="flex gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-base-800" />
-                <div className="w-2 h-2 rounded-full bg-base-800" />
-              </div>
-            </div>
-            {/* Body */}
-            <div className="p-4 flex-1 overflow-hidden relative">
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,23,0)_0%,rgba(18,18,23,1)_100%)] z-10 pointer-events-none"></div>
-              <div className="space-y-1 opacity-70">
-                {Array.from({ length: 20 }).map((_, i) => (
-                  <div key={i} className="flex gap-4">
-                    <span className="text-base-700">00:{14 + i}:23.{Math.floor(Math.random() * 999)}</span>
-                    <span className={i % 3 === 0 ? "text-accent" : "text-foreground-muted"}>
-                      {i % 3 === 0 ? ">> EVENT_DETECTED" : ">> IDLE_STATE_MONITOR"}
-                    </span>
-                    <span className="text-base-600 truncate">
-                      {i % 3 === 0 ? `[OBJ_ID:${Math.floor(Math.random() * 5000)}] [CONF:${90 + Math.floor(Math.random() * 9)}%]` : "Analyzing frame buffer..."}
-                    </span>
-                  </div>
-                ))}
-                <div className="flex gap-4 animate-pulse text-accent">
-                  <span className="text-base-700">00:14:44.021</span>
-                  <span>_</span>
+                {/* --- SECTION 1: HERO (Standard Scroll) --- */}
+                <section className="min-h-screen flex flex-col items-center justify-center relative pt-20">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="text-center z-10"
+                    >
+                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-accent via-white to-amber-200 drop-shadow-2xl">
+                            OptiVision
+                        </h1>
+                        <p className="text-xl md:text-2xl text-accent/80 font-mono tracking-widest mt-2 uppercase">
+                            Panopticon Interface V.1.0
+                        </p>
+
+                        <div className="flex flex-col gap-4 w-full max-w-xs mx-auto mt-8 pointer-events-auto">
+                            <Link href="/register" className="w-full">
+                                <button className="w-full cursor-pointer bg-accent hover:bg-amber-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-[0_0_30px_rgba(245,158,11,0.2)] hover:shadow-[0_0_40px_rgba(245,158,11,0.4)] flex items-center justify-between group">
+                                    Launch System
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </Link>
+                        </div>
+                    </motion.div>
+
+                    {/* Scroll Indicator */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1, duration: 1 }}
+                        className="absolute bottom-10 text-white/50 animate-bounce"
+                    >
+                        <p className="text-xs font-mono uppercase tracking-widest mb-2">Initialize Scroll</p>
+                    </motion.div>
+                </section>
+
+                {/* --- SECTION 2: ORBITAL SCROLL (Sticky & Tall) --- */}
+                <div ref={orbitalContainerRef} className="h-[400vh] relative">
+                    <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center pointer-events-none">
+                        {/* 
+                            Cards Container 
+                            Driven by the orbitalProgress mapped from the specific container scroll 
+                        */}
+                        <div className="absolute inset-0 z-50 flex items-center justify-center">
+                            {FEATURES.map((feature, index) => {
+                                // Stagger the animations across the progress (0 to 1)
+                                const step = 1 / FEATURES.length; // 0.33
+                                const rangeStart = index * step * 0.8; // slightly overlapping
+                                const rangeEnd = rangeStart + 0.5;
+
+                                return (
+                                    <OrbitalCard
+                                        key={feature.id}
+                                        feature={feature}
+                                        scrollProgress={orbitalProgress}
+                                        range={[rangeStart, rangeEnd]}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
-              </div>
+
+                {/* --- SECTION 3: FOOTER & CTA (Standard Scroll) --- */}
+                <section className="relative z-20 pt-20 pointer-events-none">
+                    <div className="flex flex-col items-center justify-center w-full pointer-events-auto">
+                        <div className="glass-panel text-center p-12 md:p-16 max-w-4xl w-full border border-white/10 rounded-3xl relative overflow-hidden group bg-base-900/40 backdrop-blur-xl mx-6 mb-20">
+                            <div className="absolute inset-0 bg-linear-to-b from-accent/5 to-transparent pointer-events-none" />
+
+                            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white relative z-10">Ready to Optimize?</h2>
+                            <p className="text-xl text-muted mb-10 max-w-2xl mx-auto relative z-10">
+                                Join the warehouse revolution. Deploy OptiVision today and see the future of industrial safety.
+                            </p>
+                            <Link href="/register" className="relative z-10 block w-fit mx-auto">
+                                <button className="cursor-pointer group bg-accent text-white px-12 py-6 rounded-full font-bold text-xl hover:bg-amber-600 transition-all flex items-center gap-3 shadow-2xl shadow-accent/20">
+                                    Get Started
+                                    <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </Link>
+                        </div>
+                        <LandingFooter />
+                    </div>
+                </section>
+
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Specs Section - List Style */}
-      <section className="py-24 px-6 border-b border-base-800 bg-base-950">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
-          <div className="lg:col-span-4">
-            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase mb-4">System<br />Specifications</h2>
-            <p className="text-sm text-foreground-muted mb-8 max-w-xs">
-              Designed for rigorous constraints. Our pipeline prioritizes accuracy and resource efficiency over theoretical throughput.
-            </p>
-            <div className="h-px w-24 bg-accent"></div>
-          </div>
-
-          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-            {/* Spec Item */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-accent">
-                <Terminal className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">Ingestion</span>
-              </div>
-              <h3 className="text-lg font-medium text-foreground">WebSocket Pipeline</h3>
-              <p className="text-sm text-foreground-muted leading-relaxed">
-                Direct frame buffer access via secure WebSocket protocols. Supports RTSP bridging and raw MJPEG streams with automatic reconnection logic.
-              </p>
-            </div>
-
-            {/* Spec Item */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-accent">
-                <Activity className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">Heuristics</span>
-              </div>
-              <h3 className="text-lg font-medium text-foreground">Spatial Logic Engine</h3>
-              <p className="text-sm text-foreground-muted leading-relaxed">
-                Define polygonal inclusion/exclusion zones. Detections are validated against rigorous spatial constraints before event emission.
-              </p>
-            </div>
-
-            {/* Spec Item */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-accent">
-                <Zap className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">Latency</span>
-              </div>
-              <h3 className="text-lg font-medium text-foreground">Sub-100ms Inference</h3>
-              <p className="text-sm text-foreground-muted leading-relaxed">
-                Optimized YOLOv8 runtime execution guarantees near real-time analysis even on edge hardware.
-              </p>
-            </div>
-
-            {/* Spec Item */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-accent">
-                <Shield className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">Compliance</span>
-              </div>
-              <h3 className="text-lg font-medium text-foreground">Immutable Audit Logs</h3>
-              <p className="text-sm text-foreground-muted leading-relaxed">
-                Every detection, user action, and system state change is cryptographically signed and stored for post-incident review.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Metrics / Trust Section */}
-      <section className="py-24 px-6 bg-base-900 border-b border-base-800">
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <div className="w-full max-w-4xl border border-base-800 bg-base-950 p-1">
-            <div className="flex items-center justify-between px-4 py-2 bg-base-900 border-b border-base-800">
-              <span className="text-[10px] font-mono uppercase text-foreground-muted">Live_System_Metrics</span>
-              <div className="flex gap-2">
-                <span className="w-2 h-2 rounded-full bg-success/20 border border-success"></span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-base-800">
-              <div className="p-6">
-                <div className="text-[10px] font-mono text-foreground-muted uppercase mb-1">Mean Uptime</div>
-                <div className="text-2xl font-mono text-foreground">99.99%</div>
-              </div>
-              <div className="p-6">
-                <div className="text-[10px] font-mono text-foreground-muted uppercase mb-1">False Positive Rate</div>
-                <div className="text-2xl font-mono text-accent">&lt; 0.04%</div>
-              </div>
-              <div className="p-6">
-                <div className="text-[10px] font-mono text-foreground-muted uppercase mb-1">Global Events</div>
-                <div className="text-2xl font-mono text-foreground">14.2M+</div>
-              </div>
-              <div className="p-6">
-                <div className="text-[10px] font-mono text-foreground-muted uppercase mb-1">Avg Response</div>
-                <div className="text-2xl font-mono text-foreground">42ms</div>
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-12 text-sm text-foreground-muted max-w-xl">
-            OptiVision is trusted by forward-thinking industrial operators who require <span className="text-foreground font-medium">absolute deterministic behavior</span> from their monitoring infrastructure.
-          </p>
-        </div>
-      </section>
-
-      {/* Minimal Footer */}
-      <footer className="py-12 px-6 bg-base-950">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-foreground-muted font-mono">
-          <div className="flex items-center gap-2">
-            <span className="text-foreground font-bold tracking-tight">OPTIVISION</span>
-            <span className="w-px h-3 bg-base-800"></span>
-            <span>SYSTEMS_DIVISION</span>
-          </div>
-          <p>
-            © 2026 // ALL_RIGHTS_RESERVED
-          </p>
-        </div>
-      </footer>
-    </main>
-  );
+        </main>
+    );
 }
